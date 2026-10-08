@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F9F6F0">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="css/app.css">
+<script src="js/theme.js"></script>
+<title>Profile · Willian</title>
+<style>
+.roles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.roles button{min-height:52px;padding:8px 10px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font-weight:600;cursor:pointer}
+.roles button[aria-pressed="true"]{border-color:var(--sage);background:var(--sage-soft);box-shadow:inset 0 0 0 1px var(--sage)}
+</style>
+</head>
+<body>
+<header class="bar"><div class="bar-in">
+  <a class="back" id="back" href="./">&larr; Home</a>
+  <h1>Profile</h1>
+</div></header>
+<main class="wrap">
+  <form class="card" id="form">
+    <label class="f">Your name<input type="text" id="name" maxlength="40" autocomplete="name" placeholder="e.g. Sam Smith" required></label>
+    <b>Who are you in Willian?</b>
+    <div class="roles" id="roles" role="group" aria-label="Who are you in Willian?"></div>
+    <p class="note">Your name and this choice are shown with anything you post or suggest. You need both before you can post.</p>
+    <div class="btns"><button class="btn" id="save">Save</button></div>
+    <p class="note" id="msg" hidden></p>
+  </form>
+  <!-- Step 2 after saving: catch people for notifications while they're engaged -->
+  <section class="card" id="notify" hidden>
+    <b>Hear what's happening in Willian?</b>
+    <p>Get a notification for village news, replies to your ideas and important notices. Not too many, promise.</p>
+    <div class="btns"><button class="btn terra" id="yes">Yes, notify me</button><button class="btn ghost" id="no">Not now</button></div>
+    <p class="note" id="nmsg" hidden></p>
+  </section>
+  <section class="card" id="notify-ios" hidden>
+    <b>Want notifications?</b>
+    <p>On iPhone, notifications work once Willian is on your home screen. It takes three taps.</p>
+    <div class="btns"><a class="btn terra" href="install.html">Show me how</a><button class="btn ghost" id="skip">Not now</button></div>
+  </section>
+  <section class="card"><dl class="facts"><dt>Village</dt><dd>Willian</dd></dl></section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/data.js"></script>
+<script src="js/db.js"></script>
+<script src="js/push.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const get = k => { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } };
+const put = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+// Came here from a "Post" / "Suggest" button: go straight back to it after saving
+const back = new URLSearchParams(location.search).get('back');
+const safeBack = back && /^place\.html\?p=[a-z]+$/.test(back) ? back : '';
+if (safeBack) { $('back').href = safeBack; $('back').innerHTML = '&larr; Back'; $('save').textContent = 'Save and carry on'; }
+
+let role = get('willian.role');
+$('name').value = get('willian.name');
+const draw = () => $('roles').innerHTML = ROLES.map(r => '<button type="button" aria-pressed="' + (r === role) + '">' + r + '</button>').join('');
+draw();
+$('roles').onclick = e => { const b = e.target.closest('button'); if (b) { role = b.textContent; draw(); } };
+
+$('form').onsubmit = e => {
+  e.preventDefault();
+  const name = $('name').value.trim();
+  if (!name || !role) { $('msg').textContent = !name ? 'Please add your name.' : 'Please choose who you are in Willian.'; $('msg').hidden = false; return; }
+  put('willian.name', name); put('willian.role', role);
+  syncProfile();
+  // Ask about notifications once, right after the profile is complete
+  const asked = get('willian.pushAsked');
+  if (!asked && pushNeedsInstall()) return step('notify-ios');
+  if (!asked && pushSupported() && Notification.permission === 'default') return step('notify');
+  done();
+};
+const done = () => {
+  if (safeBack) location.href = safeBack + '#post';
+  else { $('notify').hidden = $('notify-ios').hidden = true; $('form').hidden = false; $('msg').textContent = 'Saved.'; $('msg').hidden = false; }
+};
+const step = id => { $('form').hidden = true; $(id).hidden = false; $(id).scrollIntoView({ block: 'start' }); };
+$('yes').onclick = async () => {
+  $('yes').disabled = true; put('willian.pushAsked', '1');
+  const r = await enablePush();
+  $('nmsg').textContent = r === 'on' ? 'You’re all set.'
+    : r === 'denied' ? 'No problem. You can turn them on later in Settings.'
+    : 'That didn’t work this time. You can try again in Settings.';
+  $('nmsg').hidden = false;
+  setTimeout(done, r === 'on' ? 900 : 1800);
+};
+$('no').onclick = () => { put('willian.pushAsked', '1'); done(); };
+$('skip').onclick = () => { put('willian.pushAsked', '1'); done(); };
+</script>
+</body>
+</html>

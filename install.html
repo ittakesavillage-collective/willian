@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F9F6F0">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Willian">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="css/app.css">
+<script src="js/theme.js"></script>
+<title>Install Willian</title>
+<style>
+.appcard{display:flex;align-items:center;gap:16px}
+.appcard img{width:76px;height:76px;border-radius:18px;border:1px solid var(--line)}
+.appcard h2{font-size:28px}
+ol.steps{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:14px}
+ol.steps li{display:flex;gap:12px;align-items:flex-start}
+ol.steps li>span{flex:none;width:30px;height:30px;border-radius:50%;background:var(--sage);color:var(--on-sage);display:grid;place-items:center;font-weight:700}
+ol.steps svg{width:20px;height:20px;vertical-align:-4px;color:var(--terra-ink)}
+.warn{background:var(--gold);color:var(--on-gold);border-color:var(--gold)}
+.warn .btn{background:var(--ink);color:var(--cream)}
+</style>
+</head>
+<body>
+<header class="bar"><div class="bar-in">
+  <a class="back" href="./">&larr; Willian</a>
+  <h1>Install</h1>
+</div></header>
+<main class="wrap">
+  <div class="appcard"><img src="icons/icon-192.png" alt="Willian app icon"><div><h2>Willian</h2><p class="muted">Willian's own village app. Free, no app store needed.</p></div></div>
+
+  <!-- Opened inside Facebook / Instagram / Messenger etc: these can't install apps -->
+  <section class="card warn" id="inapp" hidden>
+    <b>Open this page in <span class="brw">your browser</span> first</b>
+    <p>You've opened it inside another app, which can't add Willian to your home screen. Tap the <b>&middot;&middot;&middot;</b> menu and choose <b>Open in <span class="brw">browser</span></b>, or copy the link and paste it into <span class="brw">your browser</span>.</p>
+    <div class="btns"><button class="btn" id="copy">Copy link</button></div>
+  </section>
+
+  <section class="card" id="android" hidden>
+    <b>Add Willian to your phone</b>
+    <div class="btns"><button class="btn terra" id="go" hidden>Install Willian</button></div>
+    <ol class="steps" id="amanual">
+      <li><span>1</span><p>Tap the <b>&#8942;</b> menu at the top right of Chrome.</p></li>
+      <li><span>2</span><p>Tap <b>Install app</b> (or <b>Add to Home screen</b>).</p></li>
+      <li><span>3</span><p>Tap <b>Install</b>. Willian appears with your other apps.</p></li>
+    </ol>
+  </section>
+
+  <section class="card" id="ios" hidden>
+    <b>Add Willian to your iPhone</b>
+    <ol class="steps">
+      <li><span>1</span><p>Tap the <b>Share</b> button <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Share icon"><path d="M12 3v12M8 7l4-4 4 4M6 11H5v10h14V11h-1"/></svg> at the bottom of Safari (top right on iPad).</p></li>
+      <li><span>2</span><p>Scroll down and tap <b>Add to Home Screen</b>.</p></li>
+      <li><span>3</span><p>Tap <b>Add</b>. Willian appears on your home screen.</p></li>
+    </ol>
+    <p class="note">Opening Willian from the home screen keeps your settings safe. iPhones clear website data that isn't added to the home screen.</p>
+  </section>
+
+  <section class="card" id="desk" hidden>
+    <b>Willian is made for phones</b>
+    <p>Open <b id="url"></b> on your phone, or scan the QR code on the It Takes a Village poster.</p>
+  </section>
+
+  <section class="card" id="done" hidden><b>Willian is installed</b><p>Open it from your home screen.</p></section>
+
+  <div class="btns"><a class="btn ghost" href="./">Use it in the browser for now</a></div>
+</main>
+
+<script>
+const ua = navigator.userAgent;
+const show = id => document.getElementById(id).hidden = false;
+const ios = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const android = /Android/.test(ua);
+const inApp = /FBAN|FBAV|FB_IAB|Instagram|Messenger|Line\/|Snapchat|TikTok|; wv\)/.test(ua);
+const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+document.getElementById('url').textContent = location.host + location.pathname.replace(/install\.html$/, '');
+
+if (standalone) location.replace('./');
+else if (inApp) {
+  document.querySelectorAll('.brw').forEach(s => s.textContent = ios ? 'Safari' : 'Chrome');
+  show('inapp');
+} else if (ios) show('ios');
+else if (android) show('android');
+else show('desk');
+
+// Copy link (for in-app browsers)
+document.getElementById('copy').onclick = () => {
+  const link = location.origin + location.pathname.replace(/install\.html$/, '') + 'install.html', b = document.getElementById('copy');
+  const done = () => { b.textContent = 'Copied'; setTimeout(() => b.textContent = 'Copy link', 1500); };
+  try { navigator.clipboard.writeText(link).then(done, () => prompt('Copy this link:', link)); } catch (e) { prompt('Copy this link:', link); }
+};
+
+// Android / Chrome: one-tap install when the browser offers it
+let deferred;
+addEventListener('beforeinstallprompt', e => {
+  e.preventDefault(); deferred = e;
+  if (!inApp) { document.getElementById('desk').hidden = true; show('android'); }
+  document.getElementById('go').hidden = false;
+  document.getElementById('amanual').hidden = true;
+});
+document.getElementById('go').onclick = async () => {
+  if (!deferred) return;
+  deferred.prompt();
+  const r = await deferred.userChoice; deferred = null;
+  if (r.outcome === 'accepted') { document.getElementById('android').hidden = true; show('done'); }
+};
+addEventListener('appinstalled', () => { document.getElementById('android').hidden = true; show('done'); });
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>

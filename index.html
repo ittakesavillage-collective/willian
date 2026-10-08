@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F9F6F0">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Willian">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="css/app.css">
+<script src="js/theme.js"></script>
+<title>Willian</title>
+</head>
+<body>
+<header class="bar"><div class="bar-in">
+  <a class="brand" href="./"><img src="icons/icon-192.png" alt="" width="34" height="34"><span>Willian</span></a>
+  <!-- Admin-only: hidden unless this phone has signed in on admin.html -->
+  <a class="ib admin" id="admin" href="admin.html" aria-label="Admin" hidden>!</a>
+  <a class="ib" href="profile.html" aria-label="Profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></a>
+  <a class="ib" href="settings.html" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></a>
+  <a class="ib" href="about.html" aria-label="About us"><svg viewBox="0 0 24 24" aria-hidden="true" style="fill:none"><path d="M2 15l4.5-4.5L11 15" stroke="#4A7C59" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 12.5l5-6 5 6" stroke="#D96B43" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 15l4.5-4.5L22 15" stroke="#E8A838" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="17.5" r="2" fill="#E8A838"/></svg></a>
+</div></header>
+
+<main class="wrap">
+  <a class="banner" id="inst" href="install.html" hidden>
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+    <b>Add Willian to your home screen</b>
+    <button class="x" id="instx" aria-label="Hide">&times;</button>
+  </a>
+  <nav class="grid" id="grid" aria-label="Willian"></nav>
+  <p class="ver" id="ver"></p>
+</main>
+
+<script src="js/data.js"></script>
+<script>
+document.getElementById('grid').innerHTML = PLACES.filter(p => !p.hidden).map(p =>
+  '<a class="tile' + (p.id === 'yourway' ? ' yay' : '') + '" href="place.html?p=' + p.id + '">' + svg(p.id) + '<b>' + p.name + '</b></a>').join('');
+document.getElementById('ver').textContent = 'v' + VERSION;
+// Install nudge: only in a normal browser tab, until dismissed
+const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+let hid = false; try { hid = localStorage.getItem('willian.instHidden') === '1'; if (localStorage.getItem('willian.admin') === '1') document.getElementById('admin').hidden = false; } catch (e) {}
+if (!standalone && !hid) document.getElementById('inst').hidden = false;
+document.getElementById('instx').onclick = e => {
+  e.preventDefault(); document.getElementById('inst').hidden = true;
+  try { localStorage.setItem('willian.instHidden', '1'); } catch (err) {}
+};
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>

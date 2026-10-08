@@ -1,0 +1,46 @@
+// Willian app content (copied from the Hurley app 2026-10-08, now independent). Placeholders (xxx) are filled in as real details arrive.
+const VERSION = '0.1.0';
+
+// Who you are in Willian: one is required (with a name) before posting or suggesting
+const ROLES = ['Resident', 'Visitor', 'Work in Village', 'Accommodation Owner'];
+
+// 24px line icons, drawn with currentColor
+const ICONS = {
+  news:'<path d="M4 5h13v14H6a2 2 0 0 1-2-2zM17 9h3v8a2 2 0 0 1-2 2h-1M7 9h7M7 12.5h7M7 16h4"/>',
+  board:'<path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/>',
+  fox:'<path d="M4 3.5l4.5 4h7l4.5-4V12c0 4.5-3.6 8.5-8 8.5S4 16.5 4 12zM9 12.5h.01M15 12.5h.01M10.5 16.5L12 18l1.5-1.5"/>',
+  horseshoes:'<path d="M7 20.5v-9a5 5 0 0 1 10 0v9M7 20.5H4M17 20.5h3M7 16h.01M7 12.5h.01M17 16h.01M17 12.5h.01"/>',
+  shop:'<path d="M4 9h16l-1.5-4h-13zM5 9v11h14V9M9.5 20v-6h5v6"/>',
+  stay:'<path d="M3 19V6M3 15h18v4M21 19v-5a3 3 0 0 0-3-3h-7v4M7 12.5a1.5 1.5 0 1 0 .01 0"/>',
+  info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>',
+  trades:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.2L3.6 17.2a1.9 1.9 0 0 0 2.7 2.7l5.7-5.7a4 4 0 0 0 5.2-5.4l-2.6 2.6-2.3-.5-.5-2.3z"/>',
+  yourway:'<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>'
+};
+const svg = (k, cls) => '<svg viewBox="0 0 24 24" aria-hidden="true"' + (cls ? ' class="' + cls + '"' : '') +
+  ' fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + ICONS[k] + '</svg>';
+
+// Home grid order: 2 columns x 4 rows, "Your App, your way" bottom-right.
+// type: venue = a place with details; list = a list of entries; yourway = request/vote panel
+const PLACES = [
+  {id:'news', name:'News', type:'list', intro:'What\u2019s happening in Willian.',
+    items:[{t:'xxx headline', d:'xxx date', b:'xxx summary of the story.'},
+           {t:'xxx headline', d:'xxx date', b:'xxx summary of the story.'},
+           {t:'xxx headline', d:'xxx date', b:'xxx summary of the story.'}]},
+  {id:'board', name:'Message Board', type:'board', intro:'Notices, lost & found, offers of help and things for sale.'},
+  {id:'fox', name:'The Fox', type:'venue', kind:'Pub',
+    about:'xxx short description of The Fox.', hours:'xxx', phone:'xxx', web:'', map:'The Fox, Willian'},
+  {id:'horseshoes', name:'Three Horseshoes', type:'venue', kind:'Pub',
+    about:'xxx short description of the Three Horseshoes.', hours:'xxx', phone:'xxx', web:'', map:'Three Horseshoes, Willian'},
+  {id:'shop', name:'Village Shop / Post Office', type:'venue', kind:'Shop & Post Office',
+    about:'xxx short description of the village shop and post office.', hours:'xxx', phone:'xxx', web:'', map:'Willian village shop and post office'},
+  {id:'stay', name:'Other Accommodation', type:'list', intro:'Places to stay in and around Willian.',
+    items:[{t:'xxx place to stay', b:'xxx short description, phone and website.'},
+           {t:'xxx place to stay', b:'xxx short description, phone and website.'}]},
+  {id:'info', name:'Useful Info', type:'list', intro:'Handy numbers and dates for Willian.',
+    links:[{id:'trades', t:'Trusted Tradesmen', d:'Recommended by Willian residents and owners of other accommodation'}],
+    items:[{t:'Bin collections', b:'xxx'}, {t:'Doctor\u2019s surgery', b:'xxx'}, {t:'Bus times', b:'xxx'},
+           {t:'Parish council', b:'xxx'}, {t:'Church', b:'xxx'}, {t:'Emergencies', b:'999 \u00b7 non-emergency police 101 \u00b7 NHS 111'}]},
+  {id:'yourway', name:'Your App, your way', type:'yourway'},
+  // Not on the home grid: reached from Useful Info
+  {id:'trades', name:'Trusted Tradesmen', type:'trades', hidden:true, parent:'info'}
+];

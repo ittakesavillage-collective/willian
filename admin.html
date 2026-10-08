@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F9F6F0">
+<meta name="robots" content="noindex">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="css/app.css">
+<script src="js/theme.js"></script>
+<title>Admin · Willian</title>
+<style>
+.tabs{display:flex;gap:6px;overflow-x:auto}
+.tabs button{flex:none;min-height:40px;padding:6px 14px;border-radius:999px;border:1.5px solid var(--line);background:none;color:var(--ink);font-weight:600;cursor:pointer}
+.tabs button[aria-pressed="true"]{background:var(--ink);color:var(--cream);border-color:var(--ink)}
+.tabs .n{display:inline-block;min-width:20px;margin-left:4px;padding:0 6px;border-radius:999px;background:var(--gold);color:var(--on-gold);font-size:12px}
+.adm{display:flex;flex-direction:column;gap:8px}
+.adm select{min-height:40px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;padding:0 8px}
+.adm .btn{min-height:40px;padding:6px 14px}
+.btn.danger{background:none;color:var(--terra-ink);border:1.5px solid var(--terra)}
+</style>
+</head>
+<body>
+<header class="bar"><div class="bar-in">
+  <a class="back" href="./">&larr; Home</a>
+  <h1>Admin</h1>
+</div></header>
+<main class="wrap">
+  <form class="card" id="login" hidden>
+    <b>Admin sign-in</b>
+    <label class="f">Email<input type="email" id="email" autocomplete="username" required></label>
+    <label class="f">Password<input type="password" id="pw" autocomplete="current-password" required></label>
+    <div class="btns"><button class="btn">Sign in</button></div>
+  </form>
+  <div id="panel" hidden>
+    <div class="tabs" id="tabs">
+      <button data-t="notes">To Claude<span class="n" id="n-notes"></span></button>
+      <button data-t="ideas">Ideas waiting<span class="n" id="n-ideas"></span></button>
+      <button data-t="posts">Messages waiting<span class="n" id="n-posts"></span></button>
+      <button data-t="all">All ideas</button>
+      <button data-t="live">Live messages</button>
+      <button data-t="trades">Trades<span class="n" id="n-trades"></span></button>
+      <button data-t="notify">Notify</button>
+    </div>
+  </div>
+  <section class="card" id="list" hidden></section>
+  <p class="note" id="msg" hidden></p>
+  <div class="btns" id="out" hidden><button class="btn ghost" id="signout">Sign out</button></div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/data.js"></script>
+<script src="js/db.js"></script>
+<script src="js/push.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const say = t => { $('msg').textContent = t; $('msg').hidden = !t; };
+const flag = on => { try { on ? localStorage.setItem('willian.admin', '1') : localStorage.removeItem('willian.admin'); } catch (e) {} };
+let tab = 'notes';
+
+async function start() {
+  if (await isAdmin()) {
+    flag(true);
+    claimPush();
+    $('login').hidden = true; $('panel').hidden = false; $('list').hidden = false; $('out').hidden = false;
+    show(tab);
+  } else {
+    flag(false);
+    $('login').hidden = false;
+  }
+}
+
+$('login').onsubmit = async e => {
+  e.preventDefault(); say('');
+  const { error } = await sb.auth.signInWithPassword({ email: $('email').value.trim(), password: $('pw').value });
+  $('pw').value = '';
+  if (error) return say('Sign-in failed: ' + error.message);
+  if (!(await isAdmin())) { await sb.auth.signOut(); return say('That account isn’t an admin.'); }
+  start();
+};
+$('signout').onclick = async () => { await sb.auth.signOut(); flag(false); location.href = './'; };
+$('tabs').onclick = e => { const b = e.target.closest('button'); if (b) show(b.dataset.t); };
+
+// If this phone already gets notifications, link them to the admin account so admin alerts arrive here
+async function claimPush() {
+  try {
+    const sub = await currentSub();
+    if (!sub || Notification.permission !== 'granted') return;
+    const j = sub.toJSON();
+    await sb.rpc('save_push', { p_village: VILLAGE, p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth, p_role: profile().role || null });
+  } catch (e) {}
+}
+
+async function counts() {
+  const [a, b] = await Promise.all([
+    sb.from('requests').select('id', { count: 'exact', head: true }).eq('village', VILLAGE).eq('status', 'pending'),
+    sb.from('posts').select('id', { count: 'exact', head: true }).eq('village', VILLAGE).eq('status', 'pending')
+  ]);
+  $('n-ideas').textContent = a.count || ''; $('n-posts').textContent = b.count || '';
+  const c = await sb.from('dev_notes').select('id', { count: 'exact', head: true }).eq('village', VILLAGE).not('status', 'in', '(done,parked)');
+  $('n-notes').textContent = c.count || '';
+  const d = await sb.from('trades').select('id', { count: 'exact', head: true }).eq('village', VILLAGE).eq('status', 'pending');
+  $('n-trades').textContent = d.count || '';
+}
+
+// Notes to Claude: private change/coding requests, picked up at "Review and Update"
+const NOTE = { new: 'New', doing: 'Claude is on it', done: 'Done', parked: 'Parked' };
+async function showNotes() {
+  const { data, error } = await sb.from('dev_notes').select('*').eq('village', VILLAGE).order('created_at', { ascending: false }).limit(50);
+  $('list').innerHTML = '<form id="nform" class="adm"><b>Note to Claude</b>'
+    + '<textarea id="nbody" maxlength="4000" rows="4" required placeholder="A change, a fix, a new idea for Willian…"></textarea>'
+    + '<p class="note">Only you see these. Say “Review and Update” in the Willian chat and Claude works through them.</p>'
+    + '<div class="btns"><button class="btn terra">Send to Claude</button></div></form>'
+    + (error ? '<p class="note">Couldn’t load notes: ' + esc(error.message) + '</p>'
+       : data.map(n => '<div class="item adm" data-id="' + n.id + '"><div class="row"><small>' + ago(n.created_at) + '</small>'
+         + '<span class="chip s-' + ({new:'pending',doing:'building',done:'done',parked:'suggested'})[n.status] + '">' + NOTE[n.status] + '</span></div>'
+         + '<span style="white-space:pre-wrap">' + esc(n.body) + '</span>'
+         + (n.reply ? '<span class="reply"><b>Claude:</b> ' + esc(n.reply) + '</span>' : '')
+         + '<div class="btns">' + (n.status === 'parked' ? '<button class="btn ghost" data-a="unpark">Un-park</button>' : n.status !== 'done' ? '<button class="btn ghost" data-a="park">Park</button>' : '')
+         + '<button class="btn danger" data-a="ndelete">Delete</button></div></div>').join(''));
+  $('nform').onsubmit = async e => {
+    e.preventDefault();
+    const { error } = await sb.from('dev_notes').insert({ village: VILLAGE, body: $('nbody').value.trim() });
+    if (error) return say('Didn’t send: ' + error.message);
+    say('Sent. Claude will pick it up at the next Review and Update.'); show('notes');
+  };
+}
+
+// Push notifications: send to everyone (or one role); the server function checks you're an admin
+async function push(payload) {
+  const { data, error } = await sb.functions.invoke('send-push', { body: { village: VILLAGE, ...payload } });
+  if (error) {
+    let m = error.message;
+    try { m = (await error.context.json()).error || m; } catch (e) {}
+    throw new Error(m);
+  }
+  return data;
+}
+const PAGES = [['./', 'Home']].concat(PLACES.map(p => ['place.html?p=' + p.id, p.name]));
+async function showNotify() {
+  const { data: subs } = await sb.from('push_subs').select('role').eq('village', VILLAGE);
+  const n = r => (subs || []).filter(s => !r || s.role === r).length;
+  $('list').innerHTML = '<form id="pform" class="adm"><b>Send a notification</b>'
+    + '<p class="note">' + n() + ' phone' + (n() === 1 ? '' : 's') + ' signed up for notifications.</p>'
+    + '<label class="f">Title<input type="text" id="ptitle" maxlength="80" required placeholder="e.g. Road closed tomorrow"></label>'
+    + '<label class="f">Message<textarea id="pbody" maxlength="240" rows="3" placeholder="A line or two"></textarea></label>'
+    + '<label class="f">Who to send to<select id="prole"><option value="">Everyone (' + n() + ')</option>'
+    +   ROLES.map(r => '<option value="' + esc(r) + '">' + esc(r) + ' (' + n(r) + ')</option>').join('') + '</select></label>'
+    + '<label class="f">Opens<select id="purl">' + PAGES.map(([u, t]) => '<option value="' + u + '">' + esc(t) + '</option>').join('') + '</select></label>'
+    + '<div class="btns"><button class="btn terra" id="psend">Send</button></div></form>';
+  $('pform').onsubmit = async e => {
+    e.preventDefault();
+    const who = $('prole').value || 'everyone';
+    if (!confirm('Send this to ' + who + '?')) return;
+    $('psend').disabled = true;
+    try {
+      const r = await push({ title: $('ptitle').value.trim(), body: $('pbody').value.trim(), role: $('prole').value || undefined, url: $('purl').value });
+      say('Sent to ' + r.sent + ' of ' + r.total + ' phones.' + (r.gone ? ' ' + r.gone + ' had switched notifications off and were removed.' : '') + (r.failed ? ' ' + r.failed + ' failed.' : ''));
+      $('pform').reset();
+    } catch (err) { say('Not sent: ' + err.message); }
+    $('psend').disabled = false;
+  };
+}
+
+// Tell the person who suggested/posted something when it moves forward (never on reject/take-down)
+async function tellAuthor(table, id, a, value) {
+  const msgs = {
+    approve: ['Your idea is on the list', 'Willian can now vote on it.', 'place.html?p=yourway'],
+    status: value === 'planned' ? ['Your idea is planned', 'It’s going to be built.', 'place.html?p=yourway']
+          : value === 'building' ? ['Your idea is being built', '', 'place.html?p=yourway']
+          : value === 'done' ? ['Your idea is done!', 'Open Willian to see it.', 'place.html?p=yourway'] : null,
+    reply: ['We replied to your idea', '', 'place.html?p=yourway'],
+    tlive: ['Your tradesperson is listed', 'Thanks for recommending them to Willian.', 'place.html?p=trades'],
+    publish: ['Your message is live', 'It’s now on the Willian Message Board.', 'place.html?p=board']
+  };
+  const m = msgs[a];
+  if (!m || !['requests', 'posts', 'trades'].includes(table)) return;
+  const { data } = await sb.from(table).select('created_by,' + (table === 'trades' ? 'name' : 'title')).eq('id', id).single();
+  if (!data) return;
+  try { await push({ user_id: data.created_by, title: m[0], body: m[1] || data.title || data.name, url: m[2] }); } catch (e) {}
+}
+
+// Trusted Tradesmen: approve new ones, take down bad ones
+async function showTrades() {
+  const [{ data, error }, { data: recs }] = await Promise.all([
+    sb.from('trades').select('*').eq('village', VILLAGE).neq('status', 'removed').order('created_at', { ascending: false }),
+    sb.from('trade_recs').select('*')
+  ]);
+  if (error) return $('list').innerHTML = '<p class="note">Couldn\u2019t load: ' + esc(error.message) + '</p>';
+  if (!data.length) return $('list').innerHTML = '<p class="note">No tradespeople yet.</p>';
+  data.sort((a, b) => (a.status === 'pending' ? 0 : 1) - (b.status === 'pending' ? 0 : 1));
+  $('list').innerHTML = data.map(t => {
+    const rs = (recs || []).filter(r => r.trade_id === t.id);
+    return '<div class="item adm" data-id="' + t.id + '"><div class="row"><b>' + esc(t.name) + '</b><span class="chip s-' + (t.status === 'pending' ? 'pending' : 'planned') + '">' + (t.status === 'pending' ? 'Waiting' : 'Live') + '</span></div>'
+      + '<small>' + esc(t.trade) + (t.phone ? ' \u00b7 ' + esc(t.phone) : '') + (t.web ? ' \u00b7 ' + esc(t.web) : '') + ' \u00b7 ' + ago(t.created_at) + '</small>'
+      + rs.map(r => '<span class="reply">' + (r.comment ? esc(r.comment) + ' ' : '') + '<b>\u2014 ' + esc(r.name) + ' (' + esc(r.role) + ')' + (r.used_when ? ', ' + esc(r.used_when) : '') + '</b></span>').join('')
+      + '<div class="btns">' + (t.status === 'pending'
+          ? '<button class="btn" data-a="tlive">Approve</button><button class="btn danger" data-a="tremove">Reject</button>'
+          : '<button class="btn danger" data-a="tremove">Take down</button>') + '</div></div>';
+  }).join('');
+}
+
+async function show(t) {
+  tab = t;
+  document.querySelectorAll('#tabs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.t === t));
+  $('list').innerHTML = '<p class="note">Loading…</p>';
+  counts();
+  if (t === 'notes') return showNotes();
+  if (t === 'notify') return showNotify();
+  if (t === 'trades') return showTrades();
+  const ideas = t === 'ideas' || t === 'all';
+  let q = ideas ? sb.from('request_list').select('*') : sb.from('posts').select('*');
+  q = q.eq('village', VILLAGE).order('created_at', { ascending: false });
+  if (t === 'ideas' || t === 'posts') q = q.eq('status', 'pending');
+  if (t === 'live') q = q.eq('status', 'live');
+  const { data, error } = await q;
+  if (error) return $('list').innerHTML = '<p class="note">Couldn’t load: ' + esc(error.message) + '</p>';
+  if (!data.length) return $('list').innerHTML = '<p class="note">Nothing here.</p>';
+  $('list').innerHTML = data.map(r => ideas ? ideaRow(r) : postRow(r)).join('');
+}
+
+const opts = cur => ['pending','suggested','planned','building','done','rejected'].map(s => '<option value="' + s + '"' + (s === cur ? ' selected' : '') + '>' + STATUS[s] + '</option>').join('');
+const ideaRow = r => '<div class="item adm" data-id="' + r.id + '"><b>' + esc(r.title) + '</b>'
+  + (r.body ? '<span>' + esc(r.body) + '</span>' : '')
+  + '<small>' + (r.name ? esc(r.name) + ' (' + esc(r.role) + ') · ' : '') + ago(r.created_at) + ' · 👍 ' + r.ups + ' · 👎 ' + r.downs + '</small>'
+  + (r.status === 'pending'
+      ? '<div class="btns"><button class="btn" data-a="approve">Approve</button><button class="btn danger" data-a="reject">Reject</button></div>'
+      : '<div class="btns"><select data-a="status">' + opts(r.status) + '</select></div>')
+  + '<textarea placeholder="Reply shown under the idea (optional)" maxlength="1000" rows="2">' + esc(r.reply) + '</textarea>'
+  + '<div class="btns"><button class="btn ghost" data-a="reply">Save reply</button><button class="btn danger" data-a="delete">Delete</button></div></div>';
+const postRow = r => '<div class="item adm" data-id="' + r.id + '"><b>' + esc(r.title) + '</b><small>' + esc(r.name) + (r.role ? ' (' + esc(r.role) + ')' : '') + ' · ' + ago(r.created_at) + '</small>'
+  + '<span>' + esc(r.body) + '</span><div class="btns">'
+  + (r.status === 'pending' ? '<button class="btn" data-a="publish">Approve</button><button class="btn danger" data-a="remove">Reject</button>'
+                            : '<button class="btn danger" data-a="remove">Take down</button>')
+  + '</div></div>';
+
+async function act(row, a, value) {
+  const id = +row.dataset.id, ideas = tab === 'ideas' || tab === 'all';
+  const table = tab === 'notes' ? 'dev_notes' : tab === 'trades' ? 'trades' : ideas ? 'requests' : 'posts';
+  let r;
+  if (a === 'park' || a === 'unpark') r = await sb.from(table).update({ status: a === 'park' ? 'parked' : 'new', updated_at: new Date().toISOString() }).eq('id', id);
+  else if (a === 'ndelete') { if (!confirm('Delete this note?')) return; r = await sb.from(table).delete().eq('id', id); }
+  else if (a === 'approve') r = await sb.from(table).update({ status: 'suggested' }).eq('id', id);
+  else if (a === 'reject') r = await sb.from(table).update({ status: 'rejected' }).eq('id', id);
+  else if (a === 'status') r = await sb.from(table).update({ status: value }).eq('id', id);
+  else if (a === 'reply') r = await sb.from(table).update({ reply: row.querySelector('textarea').value.trim() || null }).eq('id', id);
+  else if (a === 'tlive') r = await sb.from(table).update({ status: 'live' }).eq('id', id);
+  else if (a === 'tremove') r = await sb.from(table).update({ status: 'removed' }).eq('id', id);
+  else if (a === 'publish') r = await sb.from(table).update({ status: 'live' }).eq('id', id);
+  else if (a === 'remove') r = await sb.from(table).update({ status: 'removed' }).eq('id', id);
+  else if (a === 'delete') { if (!confirm('Delete this idea and its votes for good?')) return; r = await sb.from(table).delete().eq('id', id); }
+  if (r.error) return say('Didn’t save: ' + r.error.message);
+  say(a === 'reply' ? 'Reply saved.' : '');
+  tellAuthor(table, id, a, value);
+  if (a !== 'reply') show(tab);
+}
+$('list').onclick = e => { const b = e.target.closest('button[data-a]'); if (b) act(b.closest('.adm'), b.dataset.a); };
+$('list').onchange = e => { if (e.target.dataset.a === 'status') act(e.target.closest('.adm'), 'status', e.target.value); };
+
+start();
+</script>
+</body>
+</html>

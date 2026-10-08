@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F9F6F0">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="css/app.css">
+<script src="js/theme.js"></script>
+<title>Settings · Willian</title>
+</head>
+<body>
+<header class="bar"><div class="bar-in">
+  <a class="back" href="./">&larr; Home</a>
+  <h1>Settings</h1>
+</div></header>
+<main class="wrap">
+  <section class="card"><b>Appearance</b>
+    <div class="seg" id="theme"><button data-v="auto">Auto</button><button data-v="light">Light</button><button data-v="dark">Dark</button></div>
+  </section>
+  <section class="card"><b>Text size</b>
+    <div class="seg" id="size"><button data-v="normal">Normal</button><button data-v="large">Large</button></div>
+  </section>
+  <section class="card"><div class="row"><b>Notifications</b><span class="chip" id="nstate"></span></div>
+    <p class="note" id="nnote"></p>
+    <div class="btns"><button class="btn" id="non" hidden>Turn on</button><button class="btn ghost" id="noff" hidden>Turn off</button><a class="btn" id="ninst" href="install.html" hidden>Add to home screen</a></div>
+  </section>
+  <section class="card">
+    <div class="row"><span>Version</span><b id="ver"></b></div>
+    <div class="btns"><button class="btn ghost" id="upd">Check for updates</button><a class="btn ghost" href="install.html">How to install</a></div>
+  </section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/data.js"></script>
+<script src="js/db.js"></script>
+<script src="js/push.js"></script>
+<script>
+const root = document.documentElement;
+const get = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+const put = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+function seg(id, key, cur, apply) {
+  const box = document.getElementById(id);
+  const mark = v => box.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === v));
+  mark(cur);
+  box.onclick = e => { const v = e.target.dataset.v; if (!v) return; put(key, v); apply(v); mark(v); };
+}
+seg('theme', 'willian.theme', get('willian.theme') || 'auto', v => { if (v === 'auto') delete root.dataset.theme; else root.dataset.theme = v; });
+seg('size', 'willian.size', get('willian.size') || 'normal', v => { if (v === 'large') root.dataset.size = 'large'; else delete root.dataset.size; });
+document.getElementById('ver').textContent = 'v' + VERSION;
+// Admin door: tap the version number 5 times
+let taps = 0; document.getElementById('ver').onclick = () => { if (++taps >= 5) location.href = 'admin.html'; };
+// Notifications on/off
+const N = id => document.getElementById(id);
+async function drawPush() {
+  ['non', 'noff', 'ninst'].forEach(id => N(id).hidden = true);
+  if (pushNeedsInstall()) { N('nstate').textContent = 'Off'; N('nnote').textContent = 'On iPhone, notifications work once Willian is on your home screen.'; N('ninst').hidden = false; return; }
+  if (!pushSupported()) { N('nstate').textContent = 'Not available'; N('nnote').textContent = 'This browser can’t show notifications.'; return; }
+  if (Notification.permission === 'denied') { N('nstate').textContent = 'Blocked'; N('nnote').textContent = 'Notifications are blocked for Willian. Allow them in your phone’s settings, then come back here.'; return; }
+  const on = !!(await currentSub()) && Notification.permission === 'granted';
+  N('nstate').textContent = on ? 'On' : 'Off';
+  N('nnote').textContent = on ? 'You’ll hear about village news, replies to your ideas and important notices.' : 'Get village news, replies to your ideas and important notices.';
+  N(on ? 'noff' : 'non').hidden = false;
+}
+N('non').onclick = async () => {
+  N('non').disabled = true;
+  try { localStorage.setItem('willian.pushAsked', '1'); } catch (e) {}
+  const r = await enablePush(); N('non').disabled = false;
+  if (r === 'error') N('nnote').textContent = 'That didn’t work. Check your signal and try again.';
+  else drawPush();
+};
+N('noff').onclick = async () => { N('noff').disabled = true; await disablePush(); N('noff').disabled = false; drawPush(); };
+drawPush();
+document.getElementById('upd').onclick = async () => {
+  try { const r = await navigator.serviceWorker.getRegistration(); if (r) await r.update(); } catch (e) {}
+  location.reload();
+};
+</script>
+</body>
+</html>

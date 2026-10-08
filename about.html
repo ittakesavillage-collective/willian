@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F9F6F0">
+<title>About us · Willian</title>
+<link rel="icon" href="icons/favicon-32.png">
+<script src="js/theme.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: in-app About screen; one phone column; cream logo plaque, then story, who-we-build-for trio, Your-App-your-way panel, contact */
+:root{
+  --cream:#F9F6F0; --plaque:#F4EDE0; --surface:#FFFFFF; --ink:#2C3531; --muted:#5E6762; --line:#E4DDD0;
+  --terra:#D96B43; --terra-ink:#B4502C; --sage:#4A7C59; --gold:#E8A838;
+  --on-terra:#FFFFFF; --on-sage:#FFFFFF; --on-gold:#2C3531;
+  --font:"Outfit", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --cream:#1E2421; --surface:#2C3531; --ink:#F1ECE2; --muted:#AEB7B1; --line:#3B4540;
+  --terra:#E8825C; --terra-ink:#F0956F; --sage:#7FB28E; --gold:#EDB653;
+  --on-terra:#1E2421; --on-sage:#1E2421; --on-gold:#1E2421; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --cream:#1E2421; --surface:#2C3531; --ink:#F1ECE2; --muted:#AEB7B1; --line:#3B4540;
+  --terra:#E8825C; --terra-ink:#F0956F; --sage:#7FB28E; --gold:#EDB653;
+  --on-terra:#1E2421; --on-sage:#1E2421; --on-gold:#1E2421; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--cream);color:var(--ink);font-family:var(--font);font-size:17px;line-height:1.55}
+h1,h2,h3{margin:0;font-weight:700;line-height:1.15;text-wrap:balance}
+p{margin:0}
+button,a{font:inherit}
+:focus-visible{outline:3px solid var(--terra);outline-offset:2px;border-radius:6px}
+
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:2;background:var(--cream);border-bottom:1px solid var(--line)}
+.bar-in{max-width:560px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px}
+.back{background:none;border:0;color:var(--terra-ink);font-weight:600;font-size:16px;padding:6px 0;cursor:pointer}
+.bar h1{font-size:17px;font-weight:600;flex:1;text-align:center;margin-right:52px}
+
+.wrap{max-width:560px;margin:0 auto;padding-inline:16px;padding-block:18px 48px;display:flex;flex-direction:column;gap:30px}
+
+.plaque{background:var(--plaque);border-radius:22px;padding:18px 12px 8px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.plaque img{width:100%;max-width:400px;height:auto;display:block;
+  -webkit-mask-image:radial-gradient(ellipse 88% 82% at 50% 50%,#000 76%,transparent 100%);
+          mask-image:radial-gradient(ellipse 88% 82% at 50% 50%,#000 76%,transparent 100%)}
+.tag{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#6B5E4A;font-weight:600;padding-bottom:10px}
+
+.hero{display:flex;flex-direction:column;gap:12px;text-align:center;align-items:center}
+.hero h2{font-size:28px;font-weight:800;letter-spacing:-.01em;max-width:18ch}
+.hero h2 em{font-style:normal;color:var(--terra)}
+.using{display:inline-block;background:var(--gold);color:var(--on-gold);border-radius:999px;padding:6px 14px;font-size:15px;font-weight:500}
+.using b{font-weight:700}
+
+.story{display:flex;flex-direction:column;gap:12px}
+.story p:first-child{font-size:19px;font-weight:500}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--muted)}
+
+.trio{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.trio div{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;font-size:14px;font-weight:600;line-height:1.25}
+.trio svg{width:30px;height:30px}
+@media (max-width:360px){.trio{grid-template-columns:1fr}.trio div{flex-direction:row;text-align:left}}
+
+.yay{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px;position:relative;overflow:hidden}
+.yay::before{content:"";position:absolute;inset:0 auto 0 0;width:6px;background:linear-gradient(var(--sage) 0 33%,var(--terra) 33% 66%,var(--gold) 66%)}
+.yay h3{font-size:22px;font-weight:800}
+.yay ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;font-size:16px}
+.yay li{display:flex;gap:10px;align-items:baseline}
+.yay li span{flex:none;font-weight:700;color:var(--sage);min-width:1.2em}
+.pill{align-self:flex-start;display:inline-flex;align-items:center;gap:8px;background:var(--sage);color:var(--on-sage);border:0;border-radius:999px;padding:11px 18px;font-weight:600;font-size:16px;text-decoration:none;cursor:pointer}
+.pill svg{width:18px;height:18px}
+.hint{font-size:14px;color:var(--muted)}
+
+.contact{display:flex;flex-direction:column;gap:6px}
+.contact .row{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.contact a{color:var(--terra-ink);font-weight:600;font-size:18px;user-select:all;word-break:break-all}
+.copy{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:4px 12px;font-size:14px;cursor:pointer}
+
+footer{border-top:1px solid var(--line);padding-top:14px;font-size:13px;color:var(--muted);text-align:center}
+</style>
+</head>
+<body>
+<!-- Shared It Takes a Village collective About Us page. Master copy lives in _assets/it-takes-a-village/about.html; per app only APP_NAME and BACK_URL differ. -->
+
+<header class="bar"><div class="bar-in">
+  <button class="back" id="back">← Back</button>
+  <h1>About us</h1>
+</div></header>
+
+<main class="wrap">
+  <div class="plaque">
+    <img src="assets/collective-logo.webp" alt="It Takes a Village logo: three rooftops in green, terracotta and gold, joined by figures of people under a star" width="580" height="400">
+    <div class="tag">The collective</div>
+  </div>
+
+  <section class="hero">
+    <h2>Crafted by many minds. Tailored for <em>this exact moment.</em></h2>
+    <div class="using" id="using"></div>
+  </section>
+
+  <section class="story" aria-labelledby="who">
+    <span class="eyebrow" id="who">Who we are</span>
+    <p>We're the It Takes a Village collective, a group of like-minded thinkers and developers.</p>
+    <p>We make small, one-of-a-kind apps for villages and towns, local businesses and charities. Every app is designed with the people who use it, and for them. Each one is 100% bespoke, built for its own community and its own purpose, so no two are alike.</p>
+  </section>
+
+  <section class="story" aria-labelledby="for">
+    <span class="eyebrow" id="for">Who we build for</span>
+    <div class="trio">
+      <div><svg viewBox="0 0 30 30" aria-hidden="true"><path d="M4 26V14l7-7 7 7v12z" fill="none" stroke="var(--sage)" stroke-width="2.6" stroke-linejoin="round"/><path d="M15 11l5-5 6 6v14h-8" fill="none" stroke="var(--sage)" stroke-width="2.6" stroke-linejoin="round"/></svg>Villages &amp; towns</div>
+      <div><svg viewBox="0 0 30 30" aria-hidden="true"><path d="M4 12h22l-2-6H6z M6 12v14h18V12" fill="none" stroke="var(--terra)" stroke-width="2.6" stroke-linejoin="round"/><path d="M12 26v-7h6v7" fill="none" stroke="var(--terra)" stroke-width="2.6" stroke-linejoin="round"/></svg>Local businesses</div>
+      <div><svg viewBox="0 0 30 30" aria-hidden="true"><path d="M15 26S4 19 4 11.5A5.5 5.5 0 0 1 15 9a5.5 5.5 0 0 1 11 2.5C26 19 15 26 15 26z" fill="none" stroke="var(--gold)" stroke-width="2.6" stroke-linejoin="round"/></svg>Charities</div>
+    </div>
+  </section>
+
+  <section class="yay" aria-labelledby="yay-h">
+    <h3 id="yay-h">Your App, your way</h3>
+    <p>Our apps keep growing in whatever direction the people using them call for.</p>
+    <ol>
+      <li><span>1</span>Suggest a tweak or a whole new feature.</li>
+      <li><span>2</span>Vote on other people's ideas.</li>
+      <li><span>3</span>We build what you ask for.</li>
+    </ol>
+    <a class="pill" id="req" href="mailto:broadfords@gmail.com"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Request a tweak or new app</a>
+    <p class="hint">Opens a new email to us from your phone. Just add your idea and press Send.</p>
+  </section>
+
+  <section class="contact" aria-labelledby="ct">
+    <span class="eyebrow" id="ct">Get in touch</span>
+    <p>Want an app for your village, town, business or charity?</p>
+    <div class="row"><a href="mailto:broadfords@gmail.com" id="email">broadfords@gmail.com</a><button class="copy" id="copy">Copy</button></div>
+  </section>
+
+  <footer>© It Takes a Village collective</footer>
+</main>
+
+<script>
+const APP_NAME = 'Willian';
+const BACK_URL = './';
+document.getElementById('using').innerHTML = 'You’re using <b></b> - made by the collective';
+document.querySelector('#using b').textContent = APP_NAME;
+// Option 1 (for now): email. Option 2 (later): open the app's "Your App, your way" request list instead.
+document.getElementById('req').href = 'mailto:broadfords@gmail.com?subject=' + encodeURIComponent('Idea for ' + APP_NAME)
+  + '&body=' + encodeURIComponent('My idea for ' + APP_NAME + ' is: ');
+document.getElementById('back').onclick = () => { if (history.length > 1) history.back(); else location.href = BACK_URL; };
+document.getElementById('copy').onclick = () => {
+  const b = document.getElementById('copy'), done = () => { b.textContent = 'Copied'; setTimeout(() => b.textContent = 'Copy', 1500); };
+  const sel = () => { const r = document.createRange(); r.selectNodeContents(document.getElementById('email')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); };
+  try { navigator.clipboard.writeText('broadfords@gmail.com').then(done, sel); } catch (e) { sel(); }
+};
+</script>
+</body>
+</html>
