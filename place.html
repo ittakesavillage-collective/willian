@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="format-detection" content="telephone=no, address=no">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#F9F6F0">
 <link rel="manifest" href="manifest.json">
@@ -52,7 +53,18 @@ const openForm = first => {
 const OOPS = '<p class="note">Couldn’t reach Willian’s noticeboard. Check your signal and try again.</p>';
 const errText = e => /Too many/.test(e && e.message) ? 'You already have 5 things waiting for approval. Please wait for those to be checked.' : 'Sorry, that didn’t send. Check your signal and try again.';
 
-if (p.type === 'venue') {
+if (p.type === 'venue' && p.facts) {
+  // Info-only listing: plain text, nothing that calls or opens another app. Tier 'plus' (paid, later) adds the buttons.
+  const btns = p.tier === 'plus'
+    ? '<div class="btns"><a class="btn" href="tel:' + esc(p.phone.replace(/\s/g, '')) + '">Call</a>'
+      + '<a class="btn ghost" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(p.map) + '">Map</a>'
+      + (p.web ? '<a class="btn ghost" target="_blank" rel="noopener" href="' + esc(p.web) + '">Website</a>' : '') + '</div>' : '';
+  $('main').innerHTML = hero(p.kind)
+    + '<section class="card tight"><p>' + esc(p.about) + '</p>'
+    + '<dl class="facts">' + p.facts.map(f => '<dt>' + esc(f[0]) + '</dt><dd>' + esc(f[1]) + '</dd>').join('') + '</dl></section>'
+    + (p.note ? '<p class="note">' + esc(p.note) + '</p>' : '') + btns;
+
+} else if (p.type === 'venue') {
   const tel = /^[0-9 +]+$/.test(p.phone) ? p.phone.replace(/\s/g, '') : '';
   $('main').innerHTML = hero(p.kind)
     + '<section class="card"><p>' + val(p.about) + '</p></section>'

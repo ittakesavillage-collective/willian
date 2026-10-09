@@ -1,5 +1,5 @@
 ﻿// Willian app content (copied from the Hurley app 2026-10-08, now independent). Placeholders (xxx) are filled in as real details arrive.
-const VERSION = '0.1.1';
+const VERSION = '0.2.0';
 
 // Who you are in Willian: one is required (with a name) before posting or suggesting
 const ROLES = ['Resident', 'Visitor', 'Work in Village', 'Accommodation Owner'];
@@ -27,8 +27,17 @@ const PLACES = [
            {t:'xxx headline', d:'xxx date', b:'xxx summary of the story.'},
            {t:'xxx headline', d:'xxx date', b:'xxx summary of the story.'}]},
   {id:'board', name:'Message Board', type:'board', intro:'Notices, lost & found, offers of help and things for sale.'},
-  {id:'fox', name:'The Fox', type:'venue', kind:'Pub',
-    about:'xxx short description of The Fox.', hours:'xxx', phone:'xxx', web:'', map:'The Fox, Willian'},
+  // Venue pages are info-only (tier:'info'). A paid upgrade later switches a venue to tier:'plus', which
+  // turns on the Call / Map / Website buttons (see place.html). Facts are listed as [label, text] rows.
+  {id:'fox', name:'The Fox', type:'venue', tier:'info', kind:'Gastro pub, restaurant & rooms',
+    about:'Multi-award-winning gastro pub on the village green with a 2-rosette kitchen. Seasonal local food, real ales, wines and spirits.',
+    facts:[['Food','Breakfast 7.30–11.30 (Sat–Sun 8–11)\nLunch 12–2.30 (Sun 12–6)\nDinner Mon–Thu 5.30–9\nFood Fri–Sat 12–9'],
+           ['Stay','8 rooms, 5 of them dog-friendly garden rooms'],
+           ['Garden','Heated and landscaped. Dogs welcome in the bar'],
+           ['Book','Restaurant tables bookable. Bar and garden first come, first served'],
+           ['Find us','The Fox Inn, Willian, Letchworth Garden City SG6 2AE'],
+           ['Phone','01462 480233']],
+    note:'Details from the pub’s own website, October 2026. Hours can change.', hours:'', phone:'01462 480233', web:'', map:'The Fox, Willian'},
   {id:'horseshoes', name:'Three Horseshoes', type:'venue', kind:'Pub',
     about:'xxx short description of the Three Horseshoes.', hours:'xxx', phone:'xxx', web:'', map:'Three Horseshoes, Willian'},
   {id:'shop', name:'Village Shop / Post Office', type:'venue', kind:'Shop & Post Office',

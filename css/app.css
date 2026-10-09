@@ -66,6 +66,12 @@ button,a,input,textarea,select{font:inherit}
 .hero h2{font-size:26px}
 .muted{color:var(--muted)}
 .ph{color:var(--muted);font-style:italic}
+/* info-only venue page: compact so it fits one phone screen */
+.card.tight{gap:8px;padding:14px}
+.card.tight p{margin:0;font-size:16px;line-height:1.4}
+.card.tight dl.facts{grid-template-columns:62px 1fr;gap:5px 10px;font-size:14.5px;line-height:1.3}
+.card.tight dl.facts dt{font-size:13.5px}
+.card.tight dd{white-space:pre-line}
 dl.facts{margin:0;display:grid;grid-template-columns:auto 1fr;gap:8px 14px}
 dl.facts dt{color:var(--muted)}
 dl.facts dd{margin:0;font-weight:500}

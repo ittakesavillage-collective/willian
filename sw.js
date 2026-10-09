@@ -1,5 +1,5 @@
 ﻿// Network-first: always fetch the latest when online (updates are automatic); fall back to cache offline.
-const CACHE = 'willian-v0.1.1';
+const CACHE = 'willian-v0.2.0';
 const SHELL = ['./', 'index.html', 'place.html', 'profile.html', 'settings.html', 'about.html', 'install.html', 'admin.html',
   'css/app.css', 'js/theme.js', 'js/data.js', 'js/db.js', 'js/push.js', 'js/trades.js', 'icons/icon-192.png', 'assets/collective-logo.webp'];
 
