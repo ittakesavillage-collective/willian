@@ -110,7 +110,7 @@ textarea{resize:vertical;min-height:96px}
 .vote.on{border-color:var(--sage);background:var(--sage-soft)}
 .vote:disabled{opacity:.6}
 
-/* Link card (e.g. Useful Info -> Trusted Tradesmen) */
+/* Link card (e.g. Useful Info -> Trusted Tradespeople) */
 .linkcard{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:18px;background:var(--sage);color:var(--on-sage);text-decoration:none}
 .linkcard .ic{width:44px;height:44px;border-radius:12px;background:rgb(255 255 255 / .18);display:grid;place-items:center;flex:none}
 .linkcard .ic svg{width:26px;height:26px}
@@ -119,7 +119,7 @@ textarea{resize:vertical;min-height:96px}
 .linkcard small{opacity:.9;font-size:13px}
 .linkcard .chev{font-size:30px;line-height:1;opacity:.8}
 
-/* Trusted Tradesmen */
+/* Trusted Tradespeople */
 .chips{display:flex;gap:6px;flex-wrap:wrap}
 .fchip{min-height:36px;padding:4px 12px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font-weight:500;cursor:pointer}
 .fchip[aria-pressed="true"]{background:var(--ink);color:var(--cream);border-color:var(--ink)}

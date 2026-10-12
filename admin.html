@@ -185,7 +185,7 @@ async function tellAuthor(table, id, a, value) {
   try { await push({ user_id: data.created_by, title: m[0], body: m[1] || data.title || data.name, url: m[2] }); } catch (e) {}
 }
 
-// Trusted Tradesmen: approve new ones, take down bad ones
+// Trusted Tradespeople: approve new ones, take down bad ones
 async function showTrades() {
   const [{ data, error }, { data: recs }] = await Promise.all([
     sb.from('trades').select('*').eq('village', VILLAGE).neq('status', 'removed').order('created_at', { ascending: false }),

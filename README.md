@@ -12,7 +12,7 @@ Public repo: no secrets, tokens or personal data in here. The Supabase publishab
 ## Structure
 - `index.html` home: top bar (admin `!` hidden until admin sign-in, Profile, Settings, About Us) + 8-button grid
 - `place.html?p=<id>` one page for every button; content lives in `js/data.js` (`PLACES`, `ROLES`, `VERSION`)
-- `js/db.js` Supabase connection + anonymous sign-in; `js/push.js` notifications; `js/trades.js` Trusted Tradesmen
+- `js/db.js` Supabase connection + anonymous sign-in; `js/push.js` notifications; `js/trades.js` Trusted Tradespeople
 - `admin.html` admin-only: approve messages/ideas/tradespeople, notify, notes to Claude
 - `install.html` device-aware install guide; `about.html` collective About Us (shared master)
 - `sw.js` network-first, so updates arrive automatically; bump `VERSION` (data.js) and the `CACHE` name together

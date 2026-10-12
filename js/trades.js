@@ -1,4 +1,4 @@
-// Trusted Tradesmen: tradespeople Willian residents and owners of other accommodation have actually used.
+// Trusted Tradespeople: tradespeople Willian residents and owners of other accommodation have actually used.
 // New tradespeople wait for admin approval; "I've used them too" recommendations go straight on.
 // Two or more recommendations = Trusted.
 const TRADE_TYPES = ['Builder', 'Plumber', 'Electrician', 'Heating & boilers', 'Roofer', 'Carpenter & joiner',

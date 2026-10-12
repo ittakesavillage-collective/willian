@@ -1,5 +1,5 @@
 ﻿// Willian app content (copied from the Hurley app 2026-10-08, now independent). Placeholders (xxx) are filled in as real details arrive.
-const VERSION = '0.2.0';
+const VERSION = '0.2.1';
 
 // Who you are in Willian: one is required (with a name) before posting or suggesting
 const ROLES = ['Resident', 'Visitor', 'Work in Village', 'Accommodation Owner'];
@@ -46,10 +46,10 @@ const PLACES = [
     items:[{t:'xxx place to stay', b:'xxx short description, phone and website.'},
            {t:'xxx place to stay', b:'xxx short description, phone and website.'}]},
   {id:'info', name:'Useful Info', type:'list', intro:'Handy numbers and dates for Willian.',
-    links:[{id:'trades', t:'Trusted Tradesmen', d:'Recommended by Willian residents and owners of other accommodation'}],
+    links:[{id:'trades', t:'Trusted Tradespeople', d:'Recommended by Willian residents and owners of other accommodation'}],
     items:[{t:'Bin collections', b:'xxx'}, {t:'Doctor\u2019s surgery', b:'xxx'}, {t:'Bus times', b:'xxx'},
            {t:'Parish council', b:'xxx'}, {t:'Church', b:'xxx'}, {t:'Emergencies', b:'999 \u00b7 non-emergency police 101 \u00b7 NHS 111'}]},
   {id:'yourway', name:'Your App, your way', type:'yourway'},
   // Not on the home grid: reached from Useful Info
-  {id:'trades', name:'Trusted Tradesmen', type:'trades', hidden:true, parent:'info'}
+  {id:'trades', name:'Trusted Tradespeople', type:'trades', hidden:true, parent:'info'}
 ];
