@@ -50,7 +50,7 @@ button,a,input,textarea,select{font:inherit}
 .tile:active{transform:scale(.98)}
 .tile svg{width:30px;height:30px;color:var(--sage)}
 .tile b{font-size:1.02em;font-weight:600;line-height:1.2}
-.tile.yay{background:var(--yay);border-color:var(--yay);color:var(--on-yay)}
+.tile.yay{background:var(--yay);border-color:var(--yay);color:var(--on-yay);grid-column:1 / -1;flex-direction:row;align-items:center;justify-content:flex-start;gap:14px;min-height:76px}
 .tile.yay svg{color:var(--on-yay)}
 
 .banner{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:var(--sage-soft);color:var(--ink);text-decoration:none}

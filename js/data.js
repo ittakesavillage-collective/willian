@@ -1,5 +1,5 @@
 ﻿// Willian app content (copied from the Hurley app 2026-10-08, now independent). Placeholders (xxx) are filled in as real details arrive.
-const VERSION = '0.2.1';
+const VERSION = '0.3.0';
 
 // Who you are in Willian: one is required (with a name) before posting or suggesting
 const ROLES = ['Resident', 'Visitor', 'Work in Village', 'Accommodation Owner'];
@@ -13,6 +13,7 @@ const ICONS = {
   shop:'<path d="M4 9h16l-1.5-4h-13zM5 9v11h14V9M9.5 20v-6h5v6"/>',
   stay:'<path d="M3 19V6M3 15h18v4M21 19v-5a3 3 0 0 0-3-3h-7v4M7 12.5a1.5 1.5 0 1 0 .01 0"/>',
   info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>',
+  property:'<path d="M3 11l9-7 9 7M5 9.5V20h14V9.5M10 20v-5h4v5"/>',
   trades:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.2L3.6 17.2a1.9 1.9 0 0 0 2.7 2.7l5.7-5.7a4 4 0 0 0 5.2-5.4l-2.6 2.6-2.3-.5-.5-2.3z"/>',
   yourway:'<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>'
 };
@@ -49,6 +50,10 @@ const PLACES = [
     links:[{id:'trades', t:'Trusted Tradespeople', d:'Recommended by Willian residents and owners of other accommodation'}],
     items:[{t:'Bin collections', b:'xxx'}, {t:'Doctor\u2019s surgery', b:'xxx'}, {t:'Bus times', b:'xxx'},
            {t:'Parish council', b:'xxx'}, {t:'Church', b:'xxx'}, {t:'Emergencies', b:'999 \u00b7 non-emergency police 101 \u00b7 NHS 111'}]},
+  // Properties for sale: info-only for now; a paid listing tier (agents / sellers) is the monetising plan.
+  {id:'property', name:'Properties for sale', type:'list', intro:'Homes for sale in and around Willian.',
+    items:[{t:'xxx property', b:'xxx short description, price and how to enquire.'},
+           {t:'xxx property', b:'xxx short description, price and how to enquire.'}]},
   {id:'yourway', name:'Your App, your way', type:'yourway'},
   // Not on the home grid: reached from Useful Info
   {id:'trades', name:'Trusted Tradespeople', type:'trades', hidden:true, parent:'info'}
