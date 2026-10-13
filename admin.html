@@ -201,13 +201,13 @@ async function showDiary() {
     + '<div class="btns"><button class="btn terra">Add</button></div></form>'
     + (error ? '<p class="note">Couldn’t load: ' + esc(error.message) + '</p>'
       : (data.length ? '<b>In the diary</b>' : '<p class="note">Nothing in the diary yet.</p>') + data.map(e => '<div class="item adm" data-id="' + e.id + '"><b>' + esc(e.title) + '</b>'
-        + '<small>' + dmy(e.starts_on) + ' · ' + repeatText(e.every_days) + (e.ends_on ? ' until ' + dmy(e.ends_on) : '') + (e.alert_eve ? ' · 🔔 7pm the evening before' : '') + '</small>'
+        + '<small>' + dmy(e.starts_on) + ' · ' + repeatLabel(e) + (e.ends_on ? ' until ' + dmy(e.ends_on) : '') + (e.alert_eve ? ' · 🔔 7pm the evening before' : '') + '</small>'
         + (e.details ? '<span>' + esc(e.details) + '</span>' : '')
         + '<div class="btns"><button class="btn danger" data-a="ddelete">Delete</button></div></div>').join(''));
   $('dform').onsubmit = async ev => {
     ev.preventDefault();
     const r = await sb.from('diary').insert({ village: VILLAGE, title: $('dtitle').value.trim(), details: $('ddet').value.trim() || null,
-      starts_on: $('dstart').value, every_days: +$('drep').value || null, ends_on: $('dend').value || null, alert_eve: $('dalert').checked });
+      starts_on: $('dstart').value, every_days: /^n/.test($('drep').value) ? null : (+$('drep').value || null), nth: /^n/.test($('drep').value) ? +$('drep').value.slice(1) : null, ends_on: $('dend').value || null, alert_eve: $('dalert').checked });
     if (r.error) return say('Didn’t save: ' + r.error.message);
     say('Added.'); show('diary');
   };

@@ -115,10 +115,20 @@ async function diaryEve(admin: any) {
   if (claim) return { skipped: "already sent for " + tomorrowStr };
 
   const { data: rows } = await admin.from("diary").select("*").eq("alert_eve", true);
-  const hit = (rows ?? []).filter((e: { starts_on: string; every_days: number | null; ends_on: string | null }) => {
+  // Day number of the nth (1-4) or last (5) weekday (0 = Sunday) in a month
+  const nthWeekday = (y: number, m: number, wd: number, n: number) => {
+    if (n === 5) { const last = Date.UTC(y, m + 1, 0) / DAY; return last - ((new Date(last * DAY).getUTCDay() - wd + 7) % 7); }
+    const first = Date.UTC(y, m, 1) / DAY;
+    return first + ((wd - new Date(first * DAY).getUTCDay() + 7) % 7) + (n - 1) * 7;
+  };
+  const hit = (rows ?? []).filter((e: { starts_on: string; every_days: number | null; nth: number | null; ends_on: string | null }) => {
     const s = new Date(e.starts_on + "T00:00:00Z").getTime() / DAY;
     if (tomorrow < s) return false;
     if (e.ends_on && tomorrow > new Date(e.ends_on + "T00:00:00Z").getTime() / DAY) return false;
+    if (e.nth) {
+      const t = new Date(tomorrow * DAY);
+      return tomorrow === nthWeekday(t.getUTCFullYear(), t.getUTCMonth(), new Date(s * DAY).getUTCDay(), e.nth);
+    }
     return e.every_days ? (tomorrow - s) % e.every_days === 0 : tomorrow === s;
   });
   if (!hit.length) return { skipped: "nothing to alert for " + tomorrowStr };
