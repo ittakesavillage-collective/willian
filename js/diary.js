@@ -13,7 +13,7 @@ function occurrences(e, from, to) {
   return out;
 }
 
-const REPEATS = [[0, 'Once only'], [7, 'Every week'], [14, 'Every 2 weeks'], [28, 'Every 4 weeks']];
+const REPEATS = [[0, 'Once only'], [7, 'Every week'], [14, 'Every 2 weeks'], [21, 'Every 3 weeks'], [28, 'Every 4 weeks']];
 const repeatText = n => (REPEATS.find(r => r[0] === (n || 0)) || [0, 'Every ' + n + ' days'])[1];
 
 // Upcoming list for the diary page: next 28 days, grouped by date
