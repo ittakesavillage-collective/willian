@@ -27,6 +27,7 @@
 <script src="js/db.js"></script>
 <script src="js/trades.js"></script>
 <script src="js/diary.js"></script>
+<script src="js/digest.js"></script>
 <script>
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 // Placeholder text (starts with xxx) shows greyed out
@@ -81,6 +82,9 @@ if (p.type === 'venue' && p.facts) {
     + (p.links || []).map(l => '<a class="linkcard" href="place.html?p=' + l.id + '"><span class="ic">' + svg(l.id) + '</span><span><b>' + esc(l.t) + '</b><small>' + esc(l.d) + '</small></span><span class="chev">\u203a</span></a>').join('')
     + '<section class="card">' + p.items.map(i =>
       '<div class="item"><b>' + val(i.t) + '</b>' + (i.d ? '<small>' + val(i.d) + '</small>' : '') + '<span>' + val(i.b) + '</span></div>').join('') + '</section>';
+
+} else if (p.type === 'digest') {
+  renderDigest($('main'), hero, esc, p.kind, p.intro, p.empty);
 
 } else if (p.type === 'diary') {
   renderDiary($('main'), hero, esc);

@@ -308,3 +308,9 @@ select cron.schedule('diary-eve-alert', '0 18,19 * * *', $$
     body := '{"diary":true}'::jsonb,
     headers := '{"Content-Type":"application/json"}'::jsonb)
 $$);
+
+-- ---------- Weekly digests (v0.6.0): AI drafts a list, Michael approves it, villagers see only 'live' ----------
+-- Applied 2026-10-13 via the Supabase connector (migration weekly_digests). Tables: digests (kind properties/news;
+-- status draft/live/rejected/archived), digest_config (kind -> websites the job may search), digest_runs (one run
+-- per Friday). pg_cron job 'weekly-digest-friday' (Fridays 18:00 + 19:00 UTC) -> edge function weekly-digest
+-- {"cron":true}, which acts only at Friday 7pm London. RLS: everyone signed in reads LIVE digests; admin does the rest.

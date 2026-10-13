@@ -59,7 +59,8 @@ document.getElementById('instx').onclick = e => {
     await load('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'); await load('js/db.js');
     if (!(await isAdmin())) return;
     const n = async t => (await sb.from(t).select('id', { count: 'exact', head: true }).eq('village', VILLAGE).eq('status', 'pending')).count || 0;
-    const total = (await Promise.all(['requests', 'posts', 'trades'].map(n))).reduce((a, b) => a + b, 0);
+    const drafts = (await sb.from('digests').select('id', { count: 'exact', head: true }).eq('village', VILLAGE).eq('status', 'draft')).count || 0;
+    const total = drafts + (await Promise.all(['requests', 'posts', 'trades'].map(n))).reduce((a, b) => a + b, 0);
     if (total) {
       const b = document.createElement('span'); b.className = 'badge'; b.textContent = total > 9 ? '9+' : total;
       document.getElementById('admin').appendChild(b);

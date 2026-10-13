@@ -45,6 +45,7 @@
       <button data-t="live">Live messages</button>
       <button data-t="trades">Trades<span class="n" id="n-trades"></span></button>
       <button data-t="diary">Diary</button>
+      <button data-t="props">Properties<span class="n" id="n-props"></span></button>
       <button data-t="notify">Notify</button>
     </div>
   </div>
@@ -108,6 +109,8 @@ async function counts() {
   $('n-notes').textContent = c.count || '';
   const d = await sb.from('trades').select('id', { count: 'exact', head: true }).eq('village', VILLAGE).eq('status', 'pending');
   $('n-trades').textContent = d.count || '';
+  const e2 = await sb.from('digests').select('id', { count: 'exact', head: true }).eq('village', VILLAGE).eq('status', 'draft');
+  $('n-props').textContent = e2.count || '';
 }
 
 // Notes to Claude: private change/coding requests, picked up at "Review and Update"
@@ -213,6 +216,49 @@ async function showDiary() {
   };
 }
 
+
+// Properties for sale: the Friday-night draft waits here for approval; only approved text reaches villagers.
+async function showProps() {
+  const { data, error } = await sb.from('digests').select('*').eq('village', VILLAGE).eq('kind', 'properties').order('created_at', { ascending: false }).limit(12);
+  if (error) return $('list').innerHTML = '<p class="note">Couldn’t load: ' + esc(error.message) + '</p>';
+  const draft = data.find(d => d.status === 'draft'), live = data.find(d => d.status === 'live');
+  const dt = s => new Date(s).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  $('list').innerHTML = '<div class="adm"><b>Properties for sale</b>'
+    + '<p class="note">Every Friday at 7pm an AI search drafts this list from the estate agents’ own websites. Nothing shows to villagers until you approve it. Check each line against the agent before you publish.</p>'
+    + '<div class="btns"><button class="btn ghost" id="prun">Draft one now</button></div>'
+    + (draft ? '<div class="item adm" data-id="' + draft.id + '"><div class="row"><b>Draft to approve</b><small>' + dt(draft.created_at) + (draft.meta ? ' · cost about ' + Math.round((draft.meta.est_cost_usd || 0) * 80) + 'p' : '') + '</small></div>'
+        + '<textarea id="pbody2" rows="9" maxlength="4000">' + esc(draft.body) + '</textarea>'
+        + '<div class="btns"><button class="btn terra" data-a="ppublish">Approve and publish</button><button class="btn danger" data-a="preject">Reject</button></div></div>'
+      : '<p class="note">No draft waiting.</p>')
+    + '<b>Showing to villagers now</b>'
+    + (live ? '<div class="item"><small>Published ' + dt(live.published_at) + '</small><span style="white-space:pre-line">' + esc(live.body) + '</span></div>' : '<p class="note">Nothing published yet.</p>')
+    + '</div>';
+  $('prun').onclick = async () => {
+    $('prun').disabled = true; say('Searching the agents’ websites. This takes up to a minute…');
+    try {
+      const { data: r, error: e } = await sb.functions.invoke('weekly-digest', { body: { now: true } });
+      if (e) { let m = e.message; try { m = (await e.context.json()).error || m; } catch (x) {} throw new Error(m); }
+      say('Draft ready (' + r.searches + ' searches).'); show('props');
+    } catch (err) { say('Couldn’t draft: ' + err.message); $('prun').disabled = false; }
+  };
+}
+async function propsAct(row, a) {
+  const id = +row.dataset.id;
+  if (a === 'ppublish') {
+    const body = $('pbody2').value.trim();
+    if (!body) return say('The text is empty.');
+    await sb.from('digests').update({ status: 'archived' }).eq('village', VILLAGE).eq('kind', 'properties').eq('status', 'live');
+    const r = await sb.from('digests').update({ status: 'live', body, published_at: new Date().toISOString() }).eq('id', id);
+    if (r.error) return say('Didn’t publish: ' + r.error.message);
+    say('Published. Villagers can see it now.');
+  } else {
+    const r = await sb.from('digests').update({ status: 'rejected' }).eq('id', id);
+    if (r.error) return say('Didn’t save: ' + r.error.message);
+    say('Rejected.');
+  }
+  show('props');
+}
+
 // Trusted Tradespeople: approve new ones, take down bad ones
 async function showTrades() {
   const [{ data, error }, { data: recs }] = await Promise.all([
@@ -242,6 +288,7 @@ async function show(t) {
   if (t === 'notify') return showNotify();
   if (t === 'trades') return showTrades();
   if (t === 'diary') return showDiary();
+  if (t === 'props') return showProps();
   const ideas = t === 'ideas' || t === 'all';
   let q = ideas ? sb.from('request_list').select('*') : sb.from('posts').select('*');
   q = q.eq('village', VILLAGE).order('created_at', { ascending: false });
@@ -274,6 +321,7 @@ async function act(row, a, value) {
   let r;
   if (a === 'park' || a === 'unpark') r = await sb.from(table).update({ status: a === 'park' ? 'parked' : 'new', updated_at: new Date().toISOString() }).eq('id', id);
   else if (a === 'ddelete') { if (!confirm('Delete this diary entry?')) return; r = await sb.from('diary').delete().eq('id', id); }
+  else if (a === 'ppublish' || a === 'preject') return propsAct(row, a);
   else if (a === 'ndelete') { if (!confirm('Delete this note?')) return; r = await sb.from(table).delete().eq('id', id); }
   else if (a === 'approve') r = await sb.from(table).update({ status: 'suggested' }).eq('id', id);
   else if (a === 'reject') r = await sb.from(table).update({ status: 'rejected' }).eq('id', id);

@@ -1,5 +1,5 @@
 ﻿// Willian app content (copied from the Hurley app 2026-10-08, now independent). Placeholders (xxx) are filled in as real details arrive.
-const VERSION = '0.5.3';
+const VERSION = '0.6.0';
 
 // Who you are in Willian: one is required (with a name) before posting or suggesting
 const ROLES = ['Resident', 'Visitor', 'Work in Village', 'Accommodation Owner'];
@@ -65,9 +65,8 @@ const PLACES = [
            {t:'All Saints\u2019 Church', b:'The Anglican parish church for Willian, Grade II* listed since 1954. Church Lane, Willian, Letchworth Garden City SG6 2AF. Phone 01462 637373.'},
            {t:'Emergencies', b:'999 \u00b7 non-emergency police 101 \u00b7 NHS 111'}]},
   // Properties for sale: info-only for now; a paid listing tier (agents / sellers) is the monetising plan.
-  {id:'property', name:'Properties for sale', type:'list', intro:'Homes for sale in and around Willian.',
-    items:[{t:'xxx property', b:'xxx short description, price and how to enquire.'},
-           {t:'xxx property', b:'xxx short description, price and how to enquire.'}]},
+  {id:'property', name:'Properties for sale', type:'digest', kind:'properties', intro:'Homes for sale in Willian, updated weekly.',
+    empty:'No homes listed this week. Check back soon.'},
   {id:'yourway', name:'Your App, your way', type:'yourway'},
   // Not on the home grid: reached from Useful Info
   {id:'trades', name:'Trusted Tradespeople', type:'trades', hidden:true, parent:'info'}
