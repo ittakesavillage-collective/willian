@@ -1,5 +1,5 @@
 ﻿// Willian app content (copied from the Hurley app 2026-10-08, now independent). Placeholders (xxx) are filled in as real details arrive.
-const VERSION = '0.4.1';
+const VERSION = '0.4.2';
 
 // Who you are in Willian: one is required (with a name) before posting or suggesting
 const ROLES = ['Resident', 'Visitor', 'Work in Village', 'Accommodation Owner'];
@@ -41,8 +41,13 @@ const PLACES = [
            ['Find us','The Fox Inn, Willian, Letchworth Garden City SG6 2AE'],
            ['Phone','01462 480233']],
     note:'Details from the pub’s own website, October 2026. Hours can change.', hours:'', phone:'01462 480233', web:'', map:'The Fox, Willian'},
-  {id:'horseshoes', name:'Three Horseshoes', type:'venue', kind:'Pub',
-    about:'xxx short description of the Three Horseshoes.', hours:'xxx', phone:'xxx', web:'', map:'Three Horseshoes, Willian'},
+  {id:'horseshoes', name:'Three Horseshoes', type:'venue', tier:'info', kind:'Freehouse pub',
+    about:'A true freehouse since 2018, with Cask Marque and CAMRA accreditation and a 5 star food hygiene rating after a new kitchen. The refurbished beer garden is, they say, the best in Hertfordshire.',
+    facts:[['Bar','Mon 12–9.30pm\nTue–Thu 12–10.30pm\nFri–Sat 12–midnight\nSun 12–8pm'],
+           ['Kitchen','Mon–Tue closed\nWed–Thu 12–2, 5.30–8.30pm\nFri 12–2, 5.30–9pm\nSat 12–3, 5.30–9pm\nSun 12–4pm'],
+           ['Garden','Beer garden, completely refurbished'],
+           ['Functions','Private dining, afternoon tea, funeral receptions, parties and meetings']],
+    note:'Details from the pub’s own website, October 2026. Hours can change.', hours:'', phone:'', web:'', map:'Three Horseshoes, Willian'},
   {id:'shop', name:'Village Shop / Post Office', type:'venue', kind:'Shop & Post Office',
     about:'xxx short description of the village shop and post office.', hours:'xxx', phone:'xxx', web:'', map:'Willian village shop and post office'},
   {id:'stay', name:'Other Accommodation', type:'list', intro:'Places to stay in and around Willian.',
