@@ -1,5 +1,5 @@
 ﻿// Willian app content (copied from the Hurley app 2026-10-08, now independent). Placeholders (xxx) are filled in as real details arrive.
-const VERSION = '0.5.2';
+const VERSION = '0.5.3';
 
 // Who you are in Willian: one is required (with a name) before posting or suggesting
 const ROLES = ['Resident', 'Visitor', 'Work in Village', 'Accommodation Owner'];
@@ -49,7 +49,7 @@ const PLACES = [
            ['Find us','Baldock Lane, Willian, Letchworth Garden City SG6 2AE'],
            ['Phone','01462 689024']],
     note:'Details from the pub’s own website and online listings, October 2026. Hours can change.', hours:'', phone:'01462 689024', web:'', map:'Three Horseshoes, Baldock Lane, Willian'},
-  {id:'shop', name:'Village Shop / Post Office', type:'venue', tier:'info', kind:'Willian Village Stores',
+  {id:'shop', name:'Village Shop / Post Office', type:'venue', tier:'info', photo:'images/shop.jpg', kind:'Willian Village Stores',
     about:'Willian’s own convenience shop and groceries, with a Post Office on site.',
     facts:[['Shop','Mon–Thu 8am–8pm\nFri–Sat 8am–10pm\nSun closed'],
            ['Post Office','Mon–Sat 8am–6pm, Sun closed\nEveryday banking, cash withdrawals, Royal Mail and Parcelforce'],
