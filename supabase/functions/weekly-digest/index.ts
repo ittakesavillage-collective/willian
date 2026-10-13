@@ -58,20 +58,22 @@ Deno.serve(async (req) => {
     return json({ error: "nothing to do" }, 400);
   }
 
-  const { data: cfg } = await admin.from("digest_config").select("domains").eq("kind", kind).maybeSingle();
+  const { data: cfg } = await admin.from("digest_config").select("domains,max_searches").eq("kind", kind).maybeSingle();
   const domains: string[] = cfg?.domains ?? [];
+  const maxSearches: number = cfg?.max_searches ?? 8;
   if (!domains.length) return json({ error: "No websites set in digest_config for " + kind }, 400);
 
   const messages: unknown[] = [{ role: "user", content: "Find the homes currently for sale in Willian, Hertfordshire and write this week's summary." }];
   let data: any = null, searches = 0, inTok = 0, outTok = 0;
-  for (let i = 0; i < 5; i++) {
+  const seen = new Set<string>();
+  for (let i = 0; i < 3; i++) {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01", "content-type": "application/json" },
       body: JSON.stringify({
         model: MODEL, max_tokens: 4000, system: SYSTEM, messages,
         output_config: { effort: "medium" },
-        tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 8, allowed_domains: domains,
+        tools: [{ type: "web_search_20250305", name: "web_search", max_uses: maxSearches, allowed_domains: domains,
                   user_location: { type: "approximate", city: "Letchworth Garden City", region: "Hertfordshire", country: "GB", timezone: "Europe/London" } }],
       }),
     });
@@ -79,6 +81,12 @@ Deno.serve(async (req) => {
     if (!res.ok) return json({ error: "Anthropic error", detail: data?.error?.message ?? data }, 502);
     searches += data.usage?.server_tool_use?.web_search_requests ?? 0;
     inTok += data.usage?.input_tokens ?? 0; outTok += data.usage?.output_tokens ?? 0;
+    // Remember which websites the searches actually returned, to help tune the allowed list
+    for (const blk of data.content ?? []) {
+      if (blk.type === "web_search_tool_result" && Array.isArray(blk.content)) {
+        for (const r of blk.content) { try { seen.add(new URL(r.url).hostname.replace(/^www\./, "")); } catch { /* ignore */ } }
+      }
+    }
     if (data.stop_reason === "pause_turn") { messages.push({ role: "assistant", content: data.content }); continue; }
     break;
   }
@@ -88,7 +96,7 @@ Deno.serve(async (req) => {
 
   const costUsd = (inTok * 2 + outTok * 10) / 1e6 + searches * 0.01;
   const { data: row, error: ierr } = await admin.from("digests")
-    .insert({ kind, body: text, status: "draft", meta: { model: MODEL, searches, input_tokens: inTok, output_tokens: outTok, est_cost_usd: Math.round(costUsd * 1000) / 1000 } })
+    .insert({ kind, body: text, status: "draft", meta: { model: MODEL, searches, domains_seen: [...seen], input_tokens: inTok, output_tokens: outTok, est_cost_usd: Math.round(costUsd * 1000) / 1000 } })
     .select("id").single();
   if (ierr) return json({ error: ierr.message }, 500);
   return json({ id: row.id, searches, input_tokens: inTok, output_tokens: outTok, est_cost_usd: Math.round(costUsd * 1000) / 1000, preview: text.slice(0, 300) });
