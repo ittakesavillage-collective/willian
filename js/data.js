@@ -1,5 +1,5 @@
 ﻿// Willian app content (copied from the Hurley app 2026-10-08, now independent). Placeholders (xxx) are filled in as real details arrive.
-const VERSION = '0.4.4';
+const VERSION = '0.4.5';
 
 // Who you are in Willian: one is required (with a name) before posting or suggesting
 const ROLES = ['Resident', 'Visitor', 'Work in Village', 'Accommodation Owner'];
@@ -42,12 +42,13 @@ const PLACES = [
            ['Phone','01462 480233']],
     note:'Details from the pub’s own website, October 2026. Hours can change.', hours:'', phone:'01462 480233', web:'', map:'The Fox, Willian'},
   {id:'horseshoes', name:'Three Horseshoes', type:'venue', tier:'info', kind:'Freehouse pub',
-    about:'A true freehouse since 2018, with Cask Marque and CAMRA accreditation and a 5 star food hygiene rating after a new kitchen. The refurbished beer garden is, they say, the best in Hertfordshire.',
+    about:'A true freehouse since 2018, with Cask Marque, CAMRA and a 5 star hygiene rating. Their refurbished beer garden is, they say, the best in Hertfordshire.',
     facts:[['Bar','Mon 12–9.30pm\nTue–Thu 12–10.30pm\nFri–Sat 12–midnight\nSun 12–8pm'],
            ['Kitchen','Mon–Tue closed\nWed–Thu 12–2, 5.30–8.30pm\nFri 12–2, 5.30–9pm\nSat 12–3, 5.30–9pm\nSun 12–4pm'],
-           ['Garden','Beer garden, completely refurbished'],
-           ['Functions','Private dining, afternoon tea, funeral receptions, parties and meetings']],
-    note:'Details from the pub’s own website, October 2026. Hours can change.', hours:'', phone:'', web:'', map:'Three Horseshoes, Willian'},
+           ['Functions','Private dining, afternoon tea, funeral receptions, parties and meetings'],
+           ['Find us','Baldock Lane, Willian, Letchworth Garden City SG6 2AE'],
+           ['Phone','01462 689024']],
+    note:'Details from the pub’s own website and online listings, October 2026. Hours can change.', hours:'', phone:'01462 689024', web:'', map:'Three Horseshoes, Baldock Lane, Willian'},
   {id:'shop', name:'Village Shop / Post Office', type:'venue', tier:'info', kind:'Willian Village Stores',
     about:'Willian’s own convenience shop and groceries, with a Post Office on site.',
     facts:[['Open','Mon–Thu 8am–8pm\nFri–Sat 8am–10pm\nSun closed'],
