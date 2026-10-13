@@ -108,7 +108,7 @@ if (p.type === 'venue' && p.facts) {
       if (error) throw error;
       $('list').innerHTML = data.length ? data.map(r =>
         '<div class="item"><b>' + esc(r.title) + '</b><small>' + esc(r.name) + (r.role ? ' (' + esc(r.role) + ')' : '') + ' · ' + ago(r.created_at)
-        + (r.status === 'pending' ? ' · <span class="badge">Waiting for approval</span>' : '') + '</small><span>' + esc(r.body) + '</span></div>').join('')
+        + (r.status === 'pending' ? ' · <span class="badge">Waiting for approval</span>' : '') + '</small><span style="white-space:pre-line">' + esc(r.body) + '</span></div>').join('')
         : '<p class="note">No messages yet. Be the first!</p>';
     } catch (e) { $('list').innerHTML = OOPS; }
   };
