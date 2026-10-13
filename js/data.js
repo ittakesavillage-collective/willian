@@ -1,5 +1,5 @@
 ﻿// Willian app content (copied from the Hurley app 2026-10-08, now independent). Placeholders (xxx) are filled in as real details arrive.
-const VERSION = '0.4.5';
+const VERSION = '0.4.6';
 
 // Who you are in Willian: one is required (with a name) before posting or suggesting
 const ROLES = ['Resident', 'Visitor', 'Work in Village', 'Accommodation Owner'];
@@ -56,7 +56,7 @@ const PLACES = [
            ['Post Office','Everyday banking, cash withdrawals, Royal Mail and Parcelforce'],
            ['Find us','5 Willian Road, Willian, Letchworth Garden City SG6 2AE'],
            ['Phone','01462 677586']],
-    note:'Details from online listings, October 2026. Post Office hours may differ from the shop’s.', hours:'', phone:'01462 677586', web:'', map:'5 Willian Road, Willian, Letchworth Garden City SG6 2AE'},
+    note:'Shop hours and phone checked, October 2026. Post Office hours may differ from the shop’s.', hours:'', phone:'01462 677586', web:'', map:'5 Willian Road, Willian, Letchworth Garden City SG6 2AE'},
   {id:'stay', name:'Other Accommodation', type:'list', intro:'Places to stay in and around Willian.',
     items:[{t:'xxx place to stay', b:'xxx short description, phone and website.'},
            {t:'xxx place to stay', b:'xxx short description, phone and website.'}]},
