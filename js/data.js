@@ -1,5 +1,5 @@
 ﻿// Willian app content (copied from the Hurley app 2026-10-08, now independent). Placeholders (xxx) are filled in as real details arrive.
-const VERSION = '0.4.12';
+const VERSION = '0.4.13';
 
 // Who you are in Willian: one is required (with a name) before posting or suggesting
 const ROLES = ['Resident', 'Visitor', 'Work in Village', 'Accommodation Owner'];
@@ -62,7 +62,7 @@ const PLACES = [
     links:[{id:'trades', t:'Trusted Tradespeople', d:'Recommended by Willian residents and owners of other accommodation'}],
     items:[{t:'Bin collections', b:'See Diary'}, {t:'Bus times', b:'Centrebus 92 and 92A, Stevenage to Baldock via Letchworth Railway Station. Mon–Fri about 6.30am–7pm, Sat about 7am–6.50pm, Sun and bank holidays a reduced service about 8.40am–7.25pm. Single fares capped at £3. Check the Centrebus timetable for exact times.'},
            {t:'Local council', b:'Willian has no parish council of its own. Local services are run by North Herts Council.'},
-           {t:'All Saints\u2019 Church', b:'The Anglican parish church for Willian, Grade II* listed since 1954. Willian, Letchworth Garden City SG6 2AF. Phone 01462 637373.'},
+           {t:'All Saints\u2019 Church', b:'The Anglican parish church for Willian, Grade II* listed since 1954. Church Lane, Willian, Letchworth Garden City SG6 2AF. Phone 01462 637373.'},
            {t:'Emergencies', b:'999 \u00b7 non-emergency police 101 \u00b7 NHS 111'}]},
   // Properties for sale: info-only for now; a paid listing tier (agents / sellers) is the monetising plan.
   {id:'property', name:'Properties for sale', type:'list', intro:'Homes for sale in and around Willian.',
