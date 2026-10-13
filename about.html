@@ -72,6 +72,16 @@ button,a{font:inherit}
 .pill svg{width:18px;height:18px}
 .hint{font-size:14px;color:var(--muted)}
 
+/* Share this app: native share sheet, QR on screen, copy link */
+.share-btns{display:flex;flex-wrap:wrap;gap:10px}
+.pill.alt{background:var(--surface);color:var(--ink);border:1.5px solid var(--sage)}
+.qr-ov{position:fixed;inset:0;z-index:10;background:rgba(20,25,22,.72);display:flex;align-items:center;justify-content:center;padding:16px}
+.qr-ov[hidden]{display:none}
+.qr-card{background:var(--surface);color:var(--ink);border-radius:22px;padding:22px;max-width:340px;width:100%;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
+.qr-card h3{font-size:21px;font-weight:800}
+.qr-card img{width:100%;max-width:260px;height:auto;border-radius:10px;background:#fff}
+.qr-card .pill{align-self:center}
+
 .contact{display:flex;flex-direction:column;gap:6px}
 .contact .row{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .contact a{color:var(--terra-ink);font-weight:600;font-size:18px;user-select:all;word-break:break-all}
@@ -126,6 +136,17 @@ footer{border-top:1px solid var(--line);padding-top:14px;font-size:13px;color:va
     <p class="hint">Opens a new email to us from your phone. Just add your idea and press Send.</p>
   </section>
 
+  <section class="yay share" aria-labelledby="sh-h">
+    <h3 id="sh-h">Share this app</h3>
+    <p>Know someone who'd like <b id="sh-app"></b>? Send them the link, or let them scan the code from your screen.</p>
+    <div class="share-btns">
+      <button class="pill" id="sh-send" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3M8 7l4-4 4 4M5 12v8h14v-8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Send to a friend</button>
+      <button class="pill alt" id="sh-qr"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h3v3h-3zM20 14v6h-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>Show QR code</button>
+      <button class="pill alt" id="sh-copy"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9h10v11H9zM5 15V4h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Copy link</span></button>
+    </div>
+    <p class="hint">Your friend gets a page that shows them how to add the app to their phone. It's free.</p>
+  </section>
+
   <section class="contact" aria-labelledby="ct">
     <span class="eyebrow" id="ct">Get in touch</span>
     <p>Want an app for your village, town, business or charity?</p>
@@ -134,6 +155,15 @@ footer{border-top:1px solid var(--line);padding-top:14px;font-size:13px;color:va
 
   <footer>© It Takes a Village collective</footer>
 </main>
+
+<div class="qr-ov" id="qr-ov" hidden role="dialog" aria-modal="true" aria-labelledby="qr-t">
+  <div class="qr-card">
+    <h3 id="qr-t">Scan to get the app</h3>
+    <img src="assets/share-qr.svg" alt="QR code that opens the It Takes a Village page for adding this app" width="260" height="260">
+    <p class="hint">Ask your friend to point their phone camera at this code.</p>
+    <button class="pill" id="qr-close">Done</button>
+  </div>
+</div>
 
 <script>
 const APP_NAME = 'Willian';
@@ -144,6 +174,26 @@ document.querySelector('#using b').textContent = APP_NAME;
 document.getElementById('req').href = 'mailto:broadfords@gmail.com?subject=' + encodeURIComponent('Idea for ' + APP_NAME)
   + '&body=' + encodeURIComponent('My idea for ' + APP_NAME + ' is: ');
 document.getElementById('back').onclick = () => { if (history.length > 1) history.back(); else location.href = BACK_URL; };
+// Share this app. The link goes to the collective hub (it detects the phone and shows the install steps);
+// ?from= lets the hub put this app first. Keep SHARE_URL in step with assets/share-qr.svg.
+const SHARE_URL = 'https://ittakesavillagecollective.co.uk/?from=willian';
+const SHARE_TEXT = 'I use the ' + APP_NAME + ' app and thought you might like it. It is free. Get it here:';
+document.getElementById('sh-app').textContent = 'the ' + APP_NAME + ' app';
+const shSend = document.getElementById('sh-send'), shCopy = document.getElementById('sh-copy'), qrOv = document.getElementById('qr-ov');
+if (navigator.share) {
+  shSend.hidden = false;
+  shSend.onclick = () => { navigator.share({ title: APP_NAME + ' app', text: SHARE_TEXT, url: SHARE_URL }).catch(() => {}); };
+}
+shCopy.onclick = () => {
+  const label = shCopy.querySelector('span'), done = () => { label.textContent = 'Copied'; setTimeout(() => label.textContent = 'Copy link', 1500); };
+  try { navigator.clipboard.writeText(SHARE_URL).then(done, () => { label.textContent = SHARE_URL; }); } catch (e) { label.textContent = SHARE_URL; }
+};
+document.getElementById('sh-qr').onclick = () => { qrOv.hidden = false; document.getElementById('qr-close').focus(); };
+const closeQr = () => { qrOv.hidden = true; };
+document.getElementById('qr-close').onclick = closeQr;
+qrOv.onclick = e => { if (e.target === qrOv) closeQr(); };
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeQr(); });
+
 document.getElementById('copy').onclick = () => {
   const b = document.getElementById('copy'), done = () => { b.textContent = 'Copied'; setTimeout(() => b.textContent = 'Copy', 1500); };
   const sel = () => { const r = document.createRange(); r.selectNodeContents(document.getElementById('email')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); };
