@@ -139,3 +139,8 @@ form{scroll-margin-top:76px}
 
 .ib.admin .badge{position:absolute;top:2px;right:0;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:#D32F2F;color:#fff;font-size:12px;font-weight:700;line-height:20px;text-align:center}
 .tile{min-height:100px}
+
+/* Premium upgrade: a faint photo behind a button (set `photo:'images/name.jpg'` on the place in data.js). The text stays readable. */
+.tile.photo{position:relative;overflow:hidden;isolation:isolate}
+.tile.photo::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--photo) center / cover no-repeat;opacity:.24}
+.tile.photo::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(to top,var(--surface) 5%,transparent 75%)}

@@ -39,7 +39,7 @@
 <script src="js/data.js"></script>
 <script>
 document.getElementById('grid').innerHTML = PLACES.filter(p => !p.hidden).map(p =>
-  '<a class="tile' + (p.id === 'yourway' ? ' yay' : '') + '" href="place.html?p=' + p.id + '">' + svg(p.id) + '<b>' + p.name + '</b></a>').join('');
+  '<a class="tile' + (p.id === 'yourway' ? ' yay' : '') + (p.photo ? ' photo' : '') + '"' + (p.photo ? ' style="--photo:url(' + new URL(p.photo, location.href).href + ')"' : '') + ' href="place.html?p=' + p.id + '">' + svg(p.id) + '<b>' + p.name + '</b></a>').join('');
 document.getElementById('ver').textContent = 'v' + VERSION;
 // Install nudge: only in a normal browser tab, until dismissed
 const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
