@@ -44,6 +44,7 @@
       <button data-t="all">All ideas</button>
       <button data-t="live">Live messages</button>
       <button data-t="trades">Trades<span class="n" id="n-trades"></span></button>
+      <button data-t="diary">Diary</button>
       <button data-t="notify">Notify</button>
     </div>
   </div>
@@ -56,6 +57,7 @@
 <script src="js/data.js"></script>
 <script src="js/db.js"></script>
 <script src="js/push.js"></script>
+<script src="js/diary.js"></script>
 <script>
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -185,6 +187,32 @@ async function tellAuthor(table, id, a, value) {
   try { await push({ user_id: data.created_by, title: m[0], body: m[1] || data.title || data.name, url: m[2] }); } catch (e) {}
 }
 
+// Diary: bin days and events. "Alert 7pm the evening before" sends a notification to everyone who has them on.
+async function showDiary() {
+  const { data, error } = await sb.from('diary').select('*').eq('village', VILLAGE).order('starts_on');
+  const dmy = s => new Date(s + 'T00:00:00Z').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+  $('list').innerHTML = '<form id="dform" class="adm"><b>Add to the diary</b>'
+    + '<label class="f">What<input type="text" id="dtitle" maxlength="80" required placeholder="e.g. Black bin day"></label>'
+    + '<label class="f">Details (optional)<input type="text" id="ddet" maxlength="300" placeholder="e.g. Out by 7am"></label>'
+    + '<label class="f">First date<input type="date" id="dstart" required></label>'
+    + '<label class="f">Repeats<select id="drep">' + REPEATS.map(r => '<option value="' + r[0] + '">' + r[1] + '</option>').join('') + '</select></label>'
+    + '<label class="f">Until (optional)<input type="date" id="dend"></label>'
+    + '<label class="f"><span><input type="checkbox" id="dalert"> Notify everyone at 7pm the evening before</span></label>'
+    + '<div class="btns"><button class="btn terra">Add</button></div></form>'
+    + (error ? '<p class="note">Couldn’t load: ' + esc(error.message) + '</p>'
+      : (data.length ? '<b>In the diary</b>' : '<p class="note">Nothing in the diary yet.</p>') + data.map(e => '<div class="item adm" data-id="' + e.id + '"><b>' + esc(e.title) + '</b>'
+        + '<small>' + dmy(e.starts_on) + ' · ' + repeatText(e.every_days) + (e.ends_on ? ' until ' + dmy(e.ends_on) : '') + (e.alert_eve ? ' · 🔔 7pm the evening before' : '') + '</small>'
+        + (e.details ? '<span>' + esc(e.details) + '</span>' : '')
+        + '<div class="btns"><button class="btn danger" data-a="ddelete">Delete</button></div></div>').join(''));
+  $('dform').onsubmit = async ev => {
+    ev.preventDefault();
+    const r = await sb.from('diary').insert({ village: VILLAGE, title: $('dtitle').value.trim(), details: $('ddet').value.trim() || null,
+      starts_on: $('dstart').value, every_days: +$('drep').value || null, ends_on: $('dend').value || null, alert_eve: $('dalert').checked });
+    if (r.error) return say('Didn’t save: ' + r.error.message);
+    say('Added.'); show('diary');
+  };
+}
+
 // Trusted Tradespeople: approve new ones, take down bad ones
 async function showTrades() {
   const [{ data, error }, { data: recs }] = await Promise.all([
@@ -213,6 +241,7 @@ async function show(t) {
   if (t === 'notes') return showNotes();
   if (t === 'notify') return showNotify();
   if (t === 'trades') return showTrades();
+  if (t === 'diary') return showDiary();
   const ideas = t === 'ideas' || t === 'all';
   let q = ideas ? sb.from('request_list').select('*') : sb.from('posts').select('*');
   q = q.eq('village', VILLAGE).order('created_at', { ascending: false });
@@ -244,6 +273,7 @@ async function act(row, a, value) {
   const table = tab === 'notes' ? 'dev_notes' : tab === 'trades' ? 'trades' : ideas ? 'requests' : 'posts';
   let r;
   if (a === 'park' || a === 'unpark') r = await sb.from(table).update({ status: a === 'park' ? 'parked' : 'new', updated_at: new Date().toISOString() }).eq('id', id);
+  else if (a === 'ddelete') { if (!confirm('Delete this diary entry?')) return; r = await sb.from('diary').delete().eq('id', id); }
   else if (a === 'ndelete') { if (!confirm('Delete this note?')) return; r = await sb.from(table).delete().eq('id', id); }
   else if (a === 'approve') r = await sb.from(table).update({ status: 'suggested' }).eq('id', id);
   else if (a === 'reject') r = await sb.from(table).update({ status: 'rejected' }).eq('id', id);

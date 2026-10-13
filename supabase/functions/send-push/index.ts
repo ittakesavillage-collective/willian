@@ -32,6 +32,9 @@ Deno.serve(async (req) => {
   webpush.setVapidDetails("mailto:broadfords@gmail.com", VAPID_PUBLIC, priv);
   const b = await req.json().catch(() => ({}));
 
+  // Diary evening reminders, fired by pg_cron at 18:00 and 19:00 UTC: only the run that is 7pm in London does anything.
+  if (b.diary) return json(await diaryEve(admin));
+
   // Admin alerts, fired by database triggers: { alert: 'posts'|'requests'|'profiles', key }.
   // No sign-in needed: we look the row up ourselves and alert at most once per row, so it can't be abused.
   if (b.alert) return json(await adminAlert(admin, String(b.alert), String(b.key ?? "")));
@@ -95,4 +98,32 @@ async function adminAlert(admin: any, table: string, key: string) {
   if (!ids.length) return { skipped: "no admins" };
   const { data: subs } = await admin.from("push_subs").select("endpoint,p256dh,auth").eq("village", row.village).in("user_id", ids);
   return await sendAll(admin, subs ?? [], msg);
+}
+
+// Diary: at 7pm London time, tell everyone about tomorrow's diary entries that have "alert the evening before" set.
+// deno-lint-ignore no-explicit-any
+async function diaryEve(admin: any) {
+  const parts = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", hour: "2-digit", hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit" })
+    .formatToParts(new Date()).reduce((o: Record<string, string>, p) => (o[p.type] = p.value, o), {});
+  if (parts.hour !== "19") return { skipped: "not 7pm in London" };
+  const DAY = 86400000;
+  const today = Date.UTC(+parts.year, +parts.month - 1, +parts.day) / DAY;
+  const tomorrow = today + 1;
+  const tomorrowStr = new Date(tomorrow * DAY).toISOString().slice(0, 10);
+  // Claim the evening so a retry can never send twice
+  const { error: claim } = await admin.from("diary_sent").insert({ day: tomorrowStr });
+  if (claim) return { skipped: "already sent for " + tomorrowStr };
+
+  const { data: rows } = await admin.from("diary").select("*").eq("alert_eve", true);
+  const hit = (rows ?? []).filter((e: { starts_on: string; every_days: number | null; ends_on: string | null }) => {
+    const s = new Date(e.starts_on + "T00:00:00Z").getTime() / DAY;
+    if (tomorrow < s) return false;
+    if (e.ends_on && tomorrow > new Date(e.ends_on + "T00:00:00Z").getTime() / DAY) return false;
+    return e.every_days ? (tomorrow - s) % e.every_days === 0 : tomorrow === s;
+  });
+  if (!hit.length) return { skipped: "nothing to alert for " + tomorrowStr };
+
+  const { data: subs } = await admin.from("push_subs").select("endpoint,p256dh,auth").eq("village", "willian");
+  const body = hit.map((e: { title: string }) => e.title).join(", ");
+  return await sendAll(admin, subs ?? [], { title: "Tomorrow in Willian", body, url: "place.html?p=diary" });
 }

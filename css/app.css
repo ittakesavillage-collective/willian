@@ -37,7 +37,7 @@ button,a,input,textarea,select{font:inherit}
 .ib{width:44px;height:44px;border-radius:12px;border:0;background:none;color:var(--ink);display:grid;place-items:center;cursor:pointer;text-decoration:none;flex:none}
 .ib:hover{background:var(--sage-soft)}
 .ib svg{width:24px;height:24px}
-.ib.admin{font-weight:800;font-size:22px;color:var(--terra-ink)}
+.ib.admin{position:relative;font-weight:800;font-size:22px;color:var(--terra-ink)}
 .back{background:none;border:0;color:var(--terra-ink);font-weight:600;font-size:16px;padding:10px 4px;cursor:pointer;text-decoration:none}
 .bar h1{font-size:18px;font-weight:600;flex:1;text-align:center;margin-right:56px}
 
@@ -50,7 +50,7 @@ button,a,input,textarea,select{font:inherit}
 .tile:active{transform:scale(.98)}
 .tile svg{width:30px;height:30px;color:var(--sage)}
 .tile b{font-size:1.02em;font-weight:600;line-height:1.2}
-.tile.yay{background:var(--yay);border-color:var(--yay);color:var(--on-yay);grid-column:1 / -1;flex-direction:row;align-items:center;justify-content:flex-start;gap:14px;min-height:76px}
+.tile.yay{background:var(--yay);border-color:var(--yay);color:var(--on-yay)}
 .tile.yay svg{color:var(--on-yay)}
 
 .banner{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:var(--sage-soft);color:var(--ink);text-decoration:none}
@@ -136,3 +136,6 @@ input[type=tel],input[type=url],input[type=month]{min-height:48px;padding:10px 1
    and forms open already scrolled into place (clear of the sticky top bar). */
 input,textarea,select{font-size:max(16px,1em)}
 form{scroll-margin-top:76px}
+
+.ib.admin .badge{position:absolute;top:2px;right:0;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:#D32F2F;color:#fff;font-size:12px;font-weight:700;line-height:20px;text-align:center}
+.tile{min-height:100px}

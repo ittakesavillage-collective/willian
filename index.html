@@ -49,6 +49,25 @@ document.getElementById('instx').onclick = e => {
   e.preventDefault(); document.getElementById('inst').hidden = true;
   try { localStorage.setItem('willian.instHidden', '1'); } catch (err) {}
 };
+// Admin only: red badge on "!" counting what's waiting (ideas, messages, tradespeople). Loads the database code
+// only when this phone is signed in as admin, so villagers never download it on the home screen.
+(async () => {
+  let isAdm = false; try { isAdm = localStorage.getItem('willian.admin') === '1'; } catch (e) {}
+  if (!isAdm) return;
+  const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
+  try {
+    await load('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'); await load('js/db.js');
+    if (!(await isAdmin())) return;
+    const n = async t => (await sb.from(t).select('id', { count: 'exact', head: true }).eq('village', VILLAGE).eq('status', 'pending')).count || 0;
+    const total = (await Promise.all(['requests', 'posts', 'trades'].map(n))).reduce((a, b) => a + b, 0);
+    if (total) {
+      const b = document.createElement('span'); b.className = 'badge'; b.textContent = total > 9 ? '9+' : total;
+      document.getElementById('admin').appendChild(b);
+      document.getElementById('admin').setAttribute('aria-label', 'Admin, ' + total + ' waiting');
+    }
+    if (navigator.setAppBadge) { total ? navigator.setAppBadge(total) : navigator.clearAppBadge(); }
+  } catch (e) {}
+})();
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
 </body>

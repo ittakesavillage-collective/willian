@@ -275,3 +275,36 @@ revoke execute on function public.save_push(text, text, text, text, text) from p
 revoke execute on function public.remove_push(text) from public, anon;
 grant execute on function public.save_push(text, text, text, text, text) to authenticated;
 grant execute on function public.remove_push(text) to authenticated;
+
+-- ---------- Diary (v0.4.0): bin days + events, with optional 7pm-the-evening-before alerts ----------
+-- Entries repeat every N days from starts_on (7 = weekly, 14 = fortnightly, null = once). alert_eve = push
+-- notification to everyone at 7pm London the evening before. pg_cron runs 18:00 + 19:00 UTC; the send-push
+-- function does nothing unless it is 7pm in London, and diary_sent stops a double send.
+create table if not exists public.diary (
+  id          bigint generated always as identity primary key,
+  village     text not null default 'willian' check (village = 'willian'),
+  title       text not null check (char_length(btrim(title)) between 1 and 80),
+  details     text check (char_length(details) <= 300),
+  starts_on   date not null,
+  every_days  int check (every_days between 1 and 366),
+  ends_on     date,
+  alert_eve   boolean not null default false,
+  created_at  timestamptz not null default now()
+);
+alter table public.diary enable row level security;
+drop policy if exists "everyone reads diary" on public.diary;
+create policy "everyone reads diary" on public.diary for select to authenticated using (true);
+drop policy if exists "admin writes diary" on public.diary;
+create policy "admin writes diary" on public.diary for all to authenticated using (public.is_admin()) with check (public.is_admin());
+grant select, insert, update, delete on public.diary to authenticated;
+create table if not exists public.diary_sent (day date primary key, sent_at timestamptz not null default now());
+alter table public.diary_sent enable row level security;
+revoke all on public.diary_sent from anon, authenticated;
+create extension if not exists pg_cron;
+select cron.unschedule('diary-eve-alert') where exists (select 1 from cron.job where jobname = 'diary-eve-alert');
+select cron.schedule('diary-eve-alert', '0 18,19 * * *', $$
+  select net.http_post(
+    url := 'https://avmfvctonokvlliwcpxf.supabase.co/functions/v1/send-push',
+    body := '{"diary":true}'::jsonb,
+    headers := '{"Content-Type":"application/json"}'::jsonb)
+$$);
