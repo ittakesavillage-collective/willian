@@ -1,5 +1,5 @@
 ﻿// Willian app content (copied from the Hurley app 2026-10-08, now independent). Placeholders (xxx) are filled in as real details arrive.
-const VERSION = '0.4.7';
+const VERSION = '0.4.8';
 
 // Who you are in Willian: one is required (with a name) before posting or suggesting
 const ROLES = ['Resident', 'Visitor', 'Work in Village', 'Accommodation Owner'];
@@ -51,12 +51,11 @@ const PLACES = [
     note:'Details from the pub’s own website and online listings, October 2026. Hours can change.', hours:'', phone:'01462 689024', web:'', map:'Three Horseshoes, Baldock Lane, Willian'},
   {id:'shop', name:'Village Shop / Post Office', type:'venue', tier:'info', kind:'Willian Village Stores',
     about:'Willian’s own convenience shop and groceries, with a Post Office on site.',
-    facts:[['Open','Mon–Thu 8am–8pm\nFri–Sat 8am–10pm\nSun closed'],
-           ['Shop','Convenience store and groceries'],
-           ['Post Office','Everyday banking, cash withdrawals, Royal Mail and Parcelforce'],
+    facts:[['Shop','Mon–Thu 8am–8pm\nFri–Sat 8am–10pm\nSun closed'],
+           ['Post Office','Mon–Sat 8am–6pm, Sun closed\nEveryday banking, cash withdrawals, Royal Mail and Parcelforce'],
            ['Find us','5 Willian Road, Willian, Letchworth Garden City SG6 2AE'],
            ['Phone','01462 677586']],
-    note:'Shop hours and phone checked, October 2026. Post Office hours are different from the shop’s.', hours:'', phone:'01462 677586', web:'', map:'5 Willian Road, Willian, Letchworth Garden City SG6 2AE'},
+    note:'Hours and phone checked, October 2026. Hours can change.', hours:'', phone:'01462 677586', web:'', map:'5 Willian Road, Willian, Letchworth Garden City SG6 2AE'},
   {id:'stay', name:'Other Accommodation', type:'list', intro:'Places to stay in and around Willian.',
     items:[{t:'xxx place to stay', b:'xxx short description, phone and website.'},
            {t:'xxx place to stay', b:'xxx short description, phone and website.'}]},
