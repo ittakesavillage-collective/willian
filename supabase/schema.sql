@@ -314,3 +314,10 @@ $$);
 -- status draft/live/rejected/archived), digest_config (kind -> websites the job may search), digest_runs (one run
 -- per Friday). pg_cron job 'weekly-digest-friday' (Fridays 18:00 + 19:00 UTC) -> edge function weekly-digest
 -- {"cron":true}, which acts only at Friday 7pm London. RLS: everyone signed in reads LIVE digests; admin does the rest.
+
+-- ---------- Tradesperson logo (v0.6.2): a paid extra, set by the admin only ----------
+-- trades.logo = 'images/trades/<file>.jpg|png|webp' in the repo. Guard trigger: only an admin can set or change it
+-- (a villager's insert/update leaves it null/unchanged). To set one: disable trigger trades_logo_guard, update, enable it.
+alter table public.trades add column if not exists logo text;
+alter table public.trades add constraint trades_logo_path check (logo is null or logo ~ '^images/trades/[a-z0-9._-]+\.(jpg|png|webp)$');
+-- function public.trades_logo_guard() + trigger trades_logo_guard before insert or update on public.trades.

@@ -59,7 +59,8 @@ function renderTrades(main, hero) {
       const tel = t.phone && /^[0-9 +()-]+$/.test(t.phone) ? t.phone.replace(/[^0-9+]/g, '') : '';
       const web = t.web && /^https?:\/\//i.test(t.web) ? t.web : t.web ? 'https://' + t.web : '';
       return '<section class="card trade" data-id="' + t.id + '">'
-        + '<div class="row"><div><b class="tn">' + esc(t.name) + '</b><div class="muted">' + esc(t.trade) + '</div></div>'
+        + '<div class="row"><div class="tid">' + (t.logo && /^images\/trades\/[a-z0-9._-]+\.(jpg|png|webp)$/.test(t.logo) ? '<img class="logo" src="' + esc(t.logo) + '" alt="" width="56" height="56" loading="lazy">' : '')
+        + '<div><b class="tn">' + esc(t.name) + '</b><div class="muted">' + esc(t.trade) + '</div></div></div>'
         + (t.status === 'pending' ? '<span class="chip s-pending">Waiting for approval</span>'
            : n >= 2 ? '<span class="chip trusted">✓ Trusted</span>' : '') + '</div>'
         + '<small class="muted">Recommended by ' + n + ' ' + (n === 1 ? 'person' : 'people') + (n === 1 ? ' so far' : '') + '</small>'

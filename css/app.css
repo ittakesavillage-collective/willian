@@ -144,3 +144,7 @@ form{scroll-margin-top:76px}
 .tile.photo{position:relative;overflow:hidden;isolation:isolate}
 .tile.photo::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--photo) center / cover no-repeat;opacity:.24}
 .tile.photo::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(to top,var(--surface) 5%,transparent 75%)}
+
+/* Trusted Tradespeople: optional circular logo (a paid extra, set by the admin only) */
+.trade .tid{display:flex;align-items:center;gap:12px;min-width:0}
+.trade .logo{width:56px;height:56px;border-radius:50%;object-fit:cover;background:#fff;border:1px solid var(--line);flex:none}
