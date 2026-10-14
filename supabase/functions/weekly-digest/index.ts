@@ -99,5 +99,9 @@ Deno.serve(async (req) => {
     .insert({ kind, body: text, status: "draft", meta: { model: MODEL, searches, domains_seen: [...seen], input_tokens: inTok, output_tokens: outTok, est_cost_usd: Math.round(costUsd * 1000) / 1000 } })
     .select("id").single();
   if (ierr) return json({ error: ierr.message }, 500);
+  // Tell the admin phone(s): reuse send-push's admin-alert route (it also puts the waiting count on the app icon)
+  try {
+    await fetch(Deno.env.get("SUPABASE_URL")! + "/functions/v1/send-push", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ alert: "digests", key: String(row.id) }) });
+  } catch { /* the draft is saved either way */ }
   return json({ id: row.id, searches, input_tokens: inTok, output_tokens: outTok, est_cost_usd: Math.round(costUsd * 1000) / 1000, preview: text.slice(0, 300) });
 });

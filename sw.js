@@ -1,5 +1,5 @@
 ﻿// Network-first: always fetch the latest when online (updates are automatic); fall back to cache offline.
-const CACHE = 'willian-v0.6.2';
+const CACHE = 'willian-v0.6.3';
 const SHELL = ['./', 'index.html', 'place.html', 'profile.html', 'settings.html', 'about.html', 'install.html', 'admin.html',
   'css/app.css', 'js/theme.js', 'js/data.js', 'js/db.js', 'js/push.js', 'js/trades.js', 'js/diary.js', 'js/digest.js', 'icons/icon-192.png', 'assets/collective-logo.webp', 'assets/share-qr.svg'];
 
@@ -24,9 +24,12 @@ self.addEventListener('fetch', e => {
 self.addEventListener('push', e => {
   let d = {};
   try { d = e.data ? e.data.json() : {}; } catch (err) { d = { body: e.data && e.data.text() }; }
-  e.waitUntil(self.registration.showNotification(d.title || 'Willian', {
+  // Admin alerts carry the number of things waiting for approval: show it on the app icon (your to-do list)
+  const setBadge = typeof d.badge === 'number' && self.navigator && self.navigator.setAppBadge
+    ? (d.badge > 0 ? self.navigator.setAppBadge(d.badge) : self.navigator.clearAppBadge()).catch(() => {}) : Promise.resolve();
+  e.waitUntil(Promise.all([self.registration.showNotification(d.title || 'Willian', {
     body: d.body || '', icon: 'icons/icon-192.png', badge: 'icons/icon-192.png', data: { url: d.url || './' }
-  }));
+  }), setBadge]));
 });
 self.addEventListener('notificationclick', e => {
   e.notification.close();

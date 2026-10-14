@@ -80,7 +80,7 @@ async function sendAll(admin: any, subs: Sub[], msg: { title: string; body: stri
 // deno-lint-ignore no-explicit-any
 async function adminAlert(admin: any, table: string, key: string) {
   const keyCol = table === "profiles" ? "user_id" : "id";
-  if (!["posts", "requests", "profiles", "trades"].includes(table) || !key) return { skipped: "bad alert" };
+  if (!["posts", "requests", "profiles", "trades", "digests"].includes(table) || !key) return { skipped: "bad alert" };
   // Claim the row: only the first call within 10 minutes of creation wins
   const since = new Date(Date.now() - 10 * 60 * 1000).toISOString();
   const { data: row } = await admin.from(table).update({ alerted_at: new Date().toISOString() })
@@ -88,10 +88,14 @@ async function adminAlert(admin: any, table: string, key: string) {
   if (!row) return { skipped: "already alerted or not found" };
 
   const who = `${row.name} (${row.role})`;
-  const msg = table === "trades" ? { title: "New tradesperson to approve", body: `${row.name} · ${row.trade}`, url: "admin.html" }
+  const pending = async (t: string, st: string) => (await admin.from(t).select("id", { count: "exact", head: true }).eq("status", st)).count ?? 0;
+  const badge = (await pending("requests", "pending")) + (await pending("posts", "pending")) + (await pending("trades", "pending")) + (await pending("digests", "draft"));
+  const msg0 = table === "digests" ? { title: "Properties list ready to approve", body: "This week’s draft is waiting on the admin page", url: "admin.html" } : null;
+  const msg1 = table === "trades" ? { title: "New tradesperson to approve", body: `${row.name} · ${row.trade}`, url: "admin.html" }
     : table === "posts" ? { title: "New message to approve", body: `${row.title} · ${who}`, url: "admin.html" }
     : table === "requests" ? { title: "New idea to approve", body: `${row.title} · ${who}`, url: "admin.html" }
     : { title: "New Willian user", body: who, url: "admin.html" };
+  const msg = { ...(msg0 ?? msg1), badge };
 
   const { data: admins } = await admin.from("admins").select("user_id");
   const ids = (admins ?? []).map((a: { user_id: string }) => a.user_id);
