@@ -63,7 +63,7 @@ Deno.serve(async (req) => {
   const maxSearches: number = cfg?.max_searches ?? 8;
   if (!domains.length) return json({ error: "No websites set in digest_config for " + kind }, 400);
 
-  const messages: unknown[] = [{ role: "user", content: "Find the homes currently for sale in Willian, Hertfordshire and write this week's summary." }];
+  const messages: unknown[] = [{ role: "user", content: "Find the homes currently for sale in Willian, Hertfordshire and write this week's summary. Be thorough: run a separate search for each of these agents' websites, looking for properties in Willian (for example \"Willian for sale\" plus the agent's name), before you decide there is nothing there: " + domains.join(", ") + ". Several agents may list the same home, so give each home once." }];
   let data: any = null, searches = 0, inTok = 0, outTok = 0;
   const seen = new Set<string>();
   for (let i = 0; i < 3; i++) {
