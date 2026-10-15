@@ -38,7 +38,7 @@ document.title = p.name + ' · Willian';
 $('title').textContent = p.name;
 // Sub-pages go back to their parent page, not home
 const par = p.parent && PLACES.find(x => x.id === p.parent);
-if (par) { const b = document.querySelector('.back'); b.href = 'place.html?p=' + par.id; b.innerHTML = '&larr; ' + esc(par.name); }
+if (par) { const b = document.querySelector('.back'); b.href = 'place.html?p=' + par.id; b.innerHTML = '&larr; ' + (par.name.length > 18 ? 'Back' : esc(par.name)); }
 const hero = sub => '<div class="hero"><div class="ic">' + svg(p.id) + '</div><div><h2>' + esc(p.name) + '</h2>'
   + (sub ? '<p class="muted">' + esc(sub) + '</p>' : '') + '</div></div>';
 // No posting until the profile has a name and a role

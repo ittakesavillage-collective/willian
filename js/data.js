@@ -1,5 +1,5 @@
 ﻿// Willian app content (copied from the Hurley app 2026-10-08, now independent). Placeholders (xxx) are filled in as real details arrive.
-const VERSION = '0.6.3';
+const VERSION = '0.6.5';
 
 // Who you are in Willian: one is required (with a name) before posting or suggesting
 const ROLES = ['Resident', 'Visitor', 'Work in Village', 'Accommodation Owner'];
@@ -58,7 +58,7 @@ const PLACES = [
     note:'Hours and phone checked, October 2026. Hours can change.', hours:'', phone:'01462 677586', web:'', map:'5 Willian Road, Willian, Letchworth Garden City SG6 2AE'},
   {id:'stay', name:'Where to stay in Willian', type:'list', intro:'Places to stay in and around Willian.',
     items:[{t:'The Little Barn'}, {t:'Black Squirrel Barn'}, {t:'The Fox at Willian'}, {t:'Letchworth Hall Hotel'}, {t:'Travelodge'}]},
-  {id:'info', name:'Useful Info', type:'list', intro:'Handy numbers and dates for Willian.',
+  {id:'info', name:'Useful info & trusted tradespeople', type:'list', intro:'Handy numbers and dates for Willian.',
     links:[{id:'trades', t:'Trusted Tradespeople', d:'Recommended by Willian residents and owners of other accommodation'}],
     items:[{t:'Bin collections', b:'See Diary'}, {t:'Bus times', b:'Centrebus 92 and 92A, Stevenage to Baldock via Letchworth Railway Station. Mon–Fri about 6.30am–7pm, Sat about 7am–6.50pm, Sun and bank holidays a reduced service about 8.40am–7.25pm. Single fares capped at £3. Check the Centrebus timetable for exact times.'},
            {t:'Local council', b:'Willian has no parish council of its own. Local services are run by North Herts Council.'},
