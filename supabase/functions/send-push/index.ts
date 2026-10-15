@@ -90,11 +90,13 @@ async function adminAlert(admin: any, table: string, key: string) {
   const who = `${row.name} (${row.role})`;
   const pending = async (t: string, st: string) => (await admin.from(t).select("id", { count: "exact", head: true }).eq("status", st)).count ?? 0;
   const badge = (await pending("requests", "pending")) + (await pending("posts", "pending")) + (await pending("trades", "pending")) + (await pending("digests", "draft"));
+  // Running total of people who have joined (saved a name and who they are), for the "new user" alert
+  const newUsers = table === "profiles" ? ((await admin.from("profiles").select("user_id", { count: "exact", head: true })).count ?? 0) : 0;
   const msg0 = table === "digests" ? { title: "Properties list ready to approve", body: "This week’s draft is waiting on the admin page", url: "admin.html" } : null;
   const msg1 = table === "trades" ? { title: "New tradesperson to approve", body: `${row.name} · ${row.trade}`, url: "admin.html" }
     : table === "posts" ? { title: "New message to approve", body: `${row.title} · ${who}`, url: "admin.html" }
     : table === "requests" ? { title: "New idea to approve", body: `${row.title} · ${who}`, url: "admin.html" }
-    : { title: "New Willian user", body: who, url: "admin.html" };
+    : { title: "New Willian user", body: `${who} · ${newUsers} so far`, url: "admin.html" };
   const msg = { ...(msg0 ?? msg1), badge };
 
   const { data: admins } = await admin.from("admins").select("user_id");
