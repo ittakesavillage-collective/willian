@@ -9,8 +9,15 @@ async function renderDigest(main, hero, esc, kind, intro, emptyText) {
     if (error) throw error;
     if (!data.length) { box.innerHTML = '<p class="note">' + esc(emptyText) + '</p>'; return; }
     const when = new Date(data[0].published_at).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
-    box.innerHTML = '<div class="item"><span style="white-space:pre-line">' + esc(data[0].body) + '</span></div>'
-      + '<p class="note">Updated ' + when + '. Prices and availability change, so please check with the agent.</p>';
+    // One row per home, spaced like the Diary: "Street - price - beds/type - Listed by Agent"
+    const rows = data[0].body.split('\n').map(l => l.trim()).filter(Boolean).map(l => {
+      const parts = l.split(' - ').map(x => x.trim());
+      if (parts.length < 2) return '<div class="item"><span>' + esc(l) + '</span></div>';
+      const agent = /^listed by /i.test(parts[parts.length - 1]) ? parts.pop() : '';
+      return '<div class="item"><b>' + esc(parts.shift()) + '</b>' + (parts.length ? '<span>' + esc(parts.join(' · ')) + '</span>' : '')
+        + (agent ? '<small>' + esc(agent) + '</small>' : '') + '</div>';
+    }).join('');
+    box.innerHTML = rows + '<p class="note">Updated ' + when + '. Prices and availability change, so please check with the agent.</p>';
   } catch (e) {
     box.innerHTML = '<p class="note">Couldn’t reach the latest list. Check your signal and try again.</p>';
   }
