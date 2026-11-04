@@ -46,6 +46,7 @@
       <button data-t="trades">Trades<span class="n" id="n-trades"></span></button>
       <button data-t="diary">Diary</button>
       <button data-t="props">Properties<span class="n" id="n-props"></span></button>
+      <button data-t="members">Members<span class="n" id="n-members"></span></button>
       <button data-t="notify">Notify</button>
     </div>
   </div>
@@ -261,6 +262,32 @@ async function propsAct(row, a) {
   show('props');
 }
 
+// Members: everyone who has saved a profile (name + group), whether they get notifications, and whether they installed the app
+async function showMembers() {
+  const [pr, ins, ps] = await Promise.all([
+    sb.from('profiles').select('user_id,name,role,created_at').eq('village', VILLAGE).order('created_at', { ascending: false }),
+    sb.from('installs').select('user_id,platform,created_at').eq('village', VILLAGE),
+    sb.from('push_subs').select('user_id').eq('village', VILLAGE)
+  ]);
+  if (pr.error) return $('list').innerHTML = '<p class="note">Couldn\u2019t load: ' + esc(pr.error.message) + '</p>';
+  const inst = new Map((ins.data || []).map(r => [r.user_id, r])), notif = new Set((ps.data || []).map(r => r.user_id));
+  const members = pr.data || [], named = new Set(members.map(m => m.user_id));
+  const unnamed = (ins.data || []).filter(i => !named.has(i.user_id));
+  const nOn = members.filter(m => notif.has(m.user_id)).length, nIns = members.filter(m => inst.has(m.user_id)).length;
+  const groups = {}; members.forEach(m => groups[m.role] = (groups[m.role] || 0) + 1);
+  const when = s => new Date(s).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  const chip = (on, yes, no) => '<span class="chip ' + (on ? 's-planned' : 's-pending') + '">' + (on ? yes : no) + '</span>';
+  $('list').innerHTML = '<div class="adm"><b>Members</b>'
+    + '<p class="note">' + members.length + ' member' + (members.length === 1 ? '' : 's') + ' \u00b7 ' + nOn + ' with notifications on \u00b7 ' + nIns + ' installed'
+    + (unnamed.length ? ' \u00b7 ' + unnamed.length + ' installed with no profile yet' : '') + '</p>'
+    + '<p class="note">' + (Object.keys(groups).length ? Object.entries(groups).map(([g, n]) => esc(g) + ' ' + n).join(' \u00b7 ') : 'No members yet') + '</p></div>'
+    + members.map(m => '<div class="item adm"><div class="row"><b>' + esc(m.name) + '</b><small>' + esc(m.role) + ' \u00b7 joined ' + when(m.created_at) + '</small></div>'
+        + '<div class="row">' + chip(notif.has(m.user_id), '\u{1F514} Notifications on', '\u{1F515} Notifications off')
+        + chip(inst.has(m.user_id), '\u{1F4F2} Installed', 'Not installed') + '</div></div>').join('')
+    + unnamed.map(i => '<div class="item adm"><div class="row"><b>No profile yet</b><small>' + esc(i.platform || 'phone') + ' \u00b7 installed ' + when(i.created_at) + '</small></div>'
+        + '<div class="row">' + chip(notif.has(i.user_id), '\u{1F514} Notifications on', '\u{1F515} Notifications off') + chip(true, '\u{1F4F2} Installed', '') + '</div></div>').join('');
+}
+
 // Trusted Tradespeople: approve new ones, take down bad ones
 async function showTrades() {
   const [{ data, error }, { data: recs }] = await Promise.all([
@@ -288,6 +315,7 @@ async function show(t) {
   counts();
   if (t === 'notes') return showNotes();
   if (t === 'notify') return showNotify();
+  if (t === 'members') return showMembers();
   if (t === 'trades') return showTrades();
   if (t === 'diary') return showDiary();
   if (t === 'props') return showProps();

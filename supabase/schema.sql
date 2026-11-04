@@ -321,3 +321,12 @@ $$);
 alter table public.trades add column if not exists logo text;
 alter table public.trades add constraint trades_logo_path check (logo is null or logo ~ '^images/trades/[a-z0-9._-]+\.(jpg|png|webp)$');
 -- function public.trades_logo_guard() + trigger trades_logo_guard before insert or update on public.trades.
+
+-- ---------- Installs (v0.7.1): one row per phone that has opened the app from its home screen ----------
+-- Recorded once by index.html (standalone display mode) -> trigger alert_new_install -> send-push "New Willian install".
+-- RLS: insert/select own row (RETURNING needs select), admin reads all. Shown on the admin Members tab.
+create table if not exists public.installs (
+  user_id uuid primary key default auth.uid() references auth.users(id) on delete cascade,
+  village text not null default 'willian' check (village = 'willian'),
+  platform text check (char_length(platform) <= 20),
+  created_at timestamptz not null default now(), alerted_at timestamptz);

@@ -49,6 +49,11 @@ document.getElementById('instx').onclick = e => {
   e.preventDefault(); document.getElementById('inst').hidden = true;
   try { localStorage.setItem('willian.instHidden', '1'); } catch (err) {}
 };
+// Loads the database code on demand (villagers browsing the home screen never download it unless it is needed)
+let dbP; const loadDb = () => dbP || (dbP = (async () => {
+  const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
+  await load('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'); await load('js/db.js');
+})());
 // Admin only: red badge on "!" counting what's waiting (ideas, messages, tradespeople). Loads the database code
 // only when this phone is signed in as admin, so villagers never download it on the home screen.
 (async () => {
@@ -56,7 +61,7 @@ document.getElementById('instx').onclick = e => {
   if (!isAdm) return;
   const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
   try {
-    await load('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'); await load('js/db.js');
+    await loadDb();
     if (!(await isAdmin())) return;
     const n = async t => (await sb.from(t).select('id', { count: 'exact', head: true }).eq('village', VILLAGE).eq('status', 'pending')).count || 0;
     const drafts = (await sb.from('digests').select('id', { count: 'exact', head: true }).eq('village', VILLAGE).eq('status', 'draft')).count || 0;
@@ -67,6 +72,19 @@ document.getElementById('instx').onclick = e => {
       document.getElementById('admin').setAttribute('aria-label', 'Admin, ' + total + ' waiting');
     }
     if (navigator.setAppBadge) { total ? navigator.setAppBadge(total) : navigator.clearAppBadge(); }
+  } catch (e) {}
+})();
+// First time this phone opens the app from its home screen (an installed copy): record it once, so the admin gets an alert.
+(async () => {
+  const installed = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  if (!installed) return;
+  try { if (localStorage.getItem('willian.installSent') === '1') return; } catch (e) { return; }
+  try {
+    await loadDb();
+    const me = await ensureUser(), ua = navigator.userAgent;
+    const platform = /iPhone|iPad|iPod/.test(ua) ? 'ios' : /Android/.test(ua) ? 'android' : 'other';
+    const { error } = await sb.from('installs').upsert({ user_id: me.id, platform }, { onConflict: 'user_id', ignoreDuplicates: true });
+    if (!error) localStorage.setItem('willian.installSent', '1');
   } catch (e) {}
 })();
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
