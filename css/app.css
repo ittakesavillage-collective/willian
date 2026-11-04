@@ -148,3 +148,7 @@ form{scroll-margin-top:76px}
 /* Trusted Tradespeople: optional circular logo (a paid extra, set by the admin only) */
 .trade .tid{display:flex;align-items:center;gap:12px;min-width:0}
 .trade .logo{width:56px;height:56px;border-radius:50%;object-fit:cover;background:#fff;border:1px solid var(--line);flex:none}
+
+/* Loyalty card buttons: compact so both sit on one row on a phone */
+.loyrow{flex-wrap:nowrap;gap:8px}
+.loyrow .btn{flex:1 1 auto;min-width:0;padding:9px 10px;font-size:15px;min-height:44px;white-space:nowrap}

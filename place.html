@@ -52,6 +52,47 @@ const openForm = first => {
   $('form').hidden = false; $('new').hidden = true;
   $('form').scrollIntoView({ block: 'start' }); $(first).focus({ preventScroll: true });
 };
+// Loyalty card (e.g. The Fox): the person adds a screenshot of their own QR code from their photos. It is kept on THIS phone
+// only (never uploaded) and shown full screen on a white background so it scans at the bar.
+function initLoyalty(id) {
+  const KEY = 'willian.loyalty.' + id, box = $('loy'), file = $('loyfile');
+  const get = () => { try { return localStorage.getItem(KEY); } catch (e) { return null; } };
+  const draw = () => {
+    const has = !!get();
+    box.innerHTML = has
+      ? '<button class="btn" id="loyshow">Show loyalty card</button><button class="btn ghost" id="loydel">Delete loyalty card</button>'
+      : '<button class="btn ghost" id="loyadd">Add my loyalty card</button>';
+    if (has) {
+      $('loyshow').onclick = show;
+      $('loydel').onclick = () => { if (confirm('Delete your loyalty card from this phone?')) { try { localStorage.removeItem(KEY); } catch (e) {} draw(); } };
+    } else $('loyadd').onclick = () => file.click();
+  };
+  const show = () => {
+    const o = document.createElement('div');
+    o.style.cssText = 'position:fixed;inset:0;z-index:50;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:16px';
+    o.innerHTML = '<img alt="Your loyalty card" style="max-width:100%;max-height:78vh;object-fit:contain"><button class="btn">Close</button>';
+    o.querySelector('img').src = get();
+    o.querySelector('button').onclick = () => o.remove();
+    document.body.appendChild(o);
+  };
+  file.onchange = () => {
+    const f = file.files && file.files[0]; if (!f) return;
+    const img = new Image(), url = URL.createObjectURL(f);
+    img.onload = () => {
+      // Shrink big screenshots (keeps the QR code crisp) so it stores comfortably
+      const k = Math.min(1, 1000 / Math.max(img.width, img.height)), c = document.createElement('canvas');
+      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      try { localStorage.setItem(KEY, c.toDataURL('image/png')); draw(); }
+      catch (e) { box.insertAdjacentHTML('afterend', '<p class="note">Sorry, this phone wouldn’t save it. Try a smaller screenshot.</p>'); }
+      file.value = '';
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); box.insertAdjacentHTML('afterend', '<p class="note">That didn’t look like a picture. Please choose a screenshot from your photos.</p>'); };
+    img.src = url;
+  };
+  draw();
+}
 const OOPS = '<p class="note">Couldn’t reach Willian’s noticeboard. Check your signal and try again.</p>';
 const errText = e => /Too many/.test(e && e.message) ? 'You already have 5 things waiting for approval. Please wait for those to be checked.' : 'Sorry, that didn’t send. Check your signal and try again.';
 
@@ -64,7 +105,9 @@ if (p.type === 'venue' && p.facts) {
   $('main').innerHTML = hero(p.kind)
     + '<section class="card tight"><p>' + esc(p.about) + '</p>'
     + '<dl class="facts">' + p.facts.map(f => '<dt>' + esc(f[0]) + '</dt><dd>' + esc(f[1]) + '</dd>').join('') + '</dl></section>'
-    + (p.note ? '<p class="note">' + esc(p.note) + '</p>' : '') + btns;
+    + (p.note ? '<p class="note">' + esc(p.note) + '</p>' : '') + btns
+    + (p.loyalty ? '<div class="btns loyrow" id="loy"></div><input type="file" id="loyfile" accept="image/*" hidden>' : '');
+  if (p.loyalty) initLoyalty(p.id);
 
 } else if (p.type === 'venue') {
   const tel = /^[0-9 +]+$/.test(p.phone) ? p.phone.replace(/\s/g, '') : '';
@@ -147,7 +190,11 @@ if (p.type === 'venue' && p.facts) {
     +   '<div class="btns"><button class="btn" id="send">Send</button><button type="button" class="btn ghost" id="cancel">Cancel</button></div>'
     + '</form>'
     + '<div id="gatebox"></div><p class="note" id="msg" hidden></p>'
-    + '<section class="card" id="list"><p class="note">Loading…</p></section>';
+    + '<section class="card" id="list"><p class="note">Loading…</p></section>'
+    + '<section class="card"><b>Part of the It Takes a Village collective</b>'
+    + '<p>Willian’s app is made by a collective of like-minded thinkers and developers who build small, bespoke apps for villages, towns, businesses and charities.</p>'
+    + '<p>Every village app shares what it learns. A good idea suggested here can improve the apps in other villages too, and theirs can come back to Willian. Think of it as a hive mind for communities, and your ideas feed it.</p>'
+    + '<div class="btns"><a class="btn ghost" href="about.html">About the collective</a></div></section>';
   let me = null, mine = {};
   const ORDER = { pending: 0, building: 1, planned: 2, suggested: 3, done: 4 };
   const thumb = (dir, n, on, id) => '<button class="vote' + (on ? ' on' : '') + '" data-id="' + id + '" data-v="' + dir + '" aria-pressed="' + on + '" aria-label="Thumbs ' + (dir > 0 ? 'up' : 'down') + '">'
