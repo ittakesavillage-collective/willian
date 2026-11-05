@@ -152,3 +152,6 @@ form{scroll-margin-top:76px}
 /* Loyalty card buttons: compact so both sit on one row on a phone */
 .loyrow{flex-wrap:nowrap;gap:8px}
 .loyrow .btn{flex:1 1 auto;min-width:0;padding:9px 10px;font-size:15px;min-height:44px;white-space:nowrap}
+
+/* Plain-text list items keep their line breaks (event fixtures, notes) */
+.item span{white-space:pre-line}

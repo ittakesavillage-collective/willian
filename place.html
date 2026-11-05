@@ -106,6 +106,7 @@ if (p.type === 'venue' && p.facts) {
     + '<section class="card tight"><p>' + esc(p.about) + '</p>'
     + '<dl class="facts">' + p.facts.map(f => '<dt>' + esc(f[0]) + '</dt><dd>' + esc(f[1]) + '</dd>').join('') + '</dl></section>'
     + (p.note ? '<p class="note">' + esc(p.note) + '</p>' : '') + btns
+    + (p.events ? '<div class="btns"><a class="btn terra" href="place.html?p=' + p.events + '">Upcoming events</a></div>' : '')
     + (p.loyalty ? '<div class="btns loyrow" id="loy"></div><input type="file" id="loyfile" accept="image/*" hidden>' : '');
   if (p.loyalty) initLoyalty(p.id);
 
