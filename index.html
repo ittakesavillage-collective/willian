@@ -49,6 +49,37 @@ document.getElementById('instx').onclick = e => {
   e.preventDefault(); document.getElementById('inst').hidden = true;
   try { localStorage.setItem('willian.instHidden', '1'); } catch (err) {}
 };
+// Install splash: people using Willian in a normal browser tab (not from the home screen) get a 4-second "get the full app" screen
+// with what they would miss. Skipped for installed phones, the admin, and after 5 showings. Add ?splash=1 to the address to preview it.
+(function () {
+  const force = new URLSearchParams(location.search).has('splash');
+  if (standalone && !force) return;
+  try {
+    if (!force) {
+      if (localStorage.getItem('willian.installSent') === '1' || localStorage.getItem('willian.admin') === '1') return;
+      if (sessionStorage.getItem('willian.splashShown') === '1') return;
+      const n = +localStorage.getItem('willian.splashCount') || 0;
+      if (n >= 5) return;
+      localStorage.setItem('willian.splashCount', String(n + 1));
+    }
+    sessionStorage.setItem('willian.splashShown', '1');
+  } catch (e) {}
+  const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const how = ios ? 'On iPhone: tap <b>Share</b>, then <b>Add to Home Screen</b>.' : 'On Android: tap the <b>&#8942;</b> menu, then <b>Install app</b>.';
+  const el = document.createElement('div');
+  el.id = 'splash'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Get the full Willian app');
+  el.innerHTML = '<img src="icons/icon-192.png" alt="" width="84" height="84">'
+    + '<h2>Get the full Willian app</h2>'
+    + '<ul><li>Bin day reminders the evening before</li><li>Village alerts and events as they happen</li><li>Opens full screen, like any other app</li></ul>'
+    + '<p class="how">' + how + '</p>'
+    + '<div class="btns"><a class="btn terra" href="install.html" id="splashgo">Show me how</a><button class="btn ghost" id="splashx">Not now</button></div>'
+    + '<div class="timer"><i></i></div>';
+  document.body.appendChild(el);
+  let t = setTimeout(close, 4000);
+  function close() { clearTimeout(t); el.classList.add('out'); setTimeout(() => el.remove(), 350); }
+  document.getElementById('splashx').onclick = close;
+  document.getElementById('splashgo').onclick = () => clearTimeout(t);
+})();
 // Loads the database code on demand (villagers browsing the home screen never download it unless it is needed)
 let dbP; const loadDb = () => dbP || (dbP = (async () => {
   const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });

@@ -155,3 +155,16 @@ form{scroll-margin-top:76px}
 
 /* Plain-text list items keep their line breaks (event fixtures, notes) */
 .item span{white-space:pre-line}
+
+/* Install splash: shown for ~4 seconds to people using the app in a browser tab (see index.html) */
+#splash{position:fixed;inset:0;z-index:100;background:var(--cream);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;transition:opacity .35s}
+#splash.out{opacity:0;pointer-events:none}
+#splash img{border-radius:20px;border:1px solid var(--line)}
+#splash h2{font-size:26px;line-height:1.15}
+#splash ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;max-width:320px;text-align:left}
+#splash li::before{content:"\2713 ";color:var(--sage);font-weight:700;margin-right:8px}
+#splash .how{color:var(--muted);font-size:15px;margin:0;max-width:320px}
+#splash .btns{justify-content:center}
+#splash .timer{position:absolute;left:0;right:0;bottom:0;height:5px;background:var(--line)}
+#splash .timer i{display:block;height:100%;width:0;background:var(--sage);animation:splashbar 4s linear forwards}
+@keyframes splashbar{to{width:100%}}
