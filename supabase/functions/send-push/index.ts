@@ -144,9 +144,12 @@ async function diaryEve(admin: any) {
     }
     return e.every_days ? (tomorrow - s) % e.every_days === 0 : tomorrow === s;
   });
-  if (!hit.length) return { skipped: "nothing to alert for " + tomorrowStr };
+  if (!hit.length) { await admin.from("diary_sent").update({ result: { nothing: true } }).eq("day", tomorrowStr); return { skipped: "nothing to alert for " + tomorrowStr }; }
 
   const { data: subs } = await admin.from("push_subs").select("endpoint,p256dh,auth").eq("village", "willian");
   const body = hit.map((e: { title: string }) => e.title).join(", ");
-  return await sendAll(admin, subs ?? [], { title: "Tomorrow in Willian", body, url: "place.html?p=diary" });
+  const res = await sendAll(admin, subs ?? [], { title: "Tomorrow in Willian", body, url: "place.html?p=diary" });
+  // Keep a record of what happened, so delivery can be checked afterwards
+  await admin.from("diary_sent").update({ result: { ...res, body } }).eq("day", tomorrowStr);
+  return res;
 }
